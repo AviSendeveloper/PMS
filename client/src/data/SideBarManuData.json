@@ -1,0 +1,562 @@
+[
+  {
+    "title": "Dashboard",
+    "type": "manu",
+    "icon": "fas fa-tachometer-alt",
+    "link": "#",
+    "isNested": true,
+    "isToggleOpen": true,
+    "nestedItem": [
+      {
+        "title": "Dashboard v1",
+        "icon": "far fa-circle",
+        "link": "./index.html"
+      },
+      {
+        "title": "Dashboard v2",
+        "icon": "far fa-circle",
+        "link": "./index2.html"
+      },
+      {
+        "title": "Dashboard v3",
+        "icon": "far fa-circle",
+        "link": "./index3.html"
+      }
+    ]
+  },
+  {
+    "title": "Widgets",
+    "type": "manu",
+    "icon": "fas fa-th",
+    "link": "pages/widgets.html",
+    "isNested": false
+  },
+  {
+    "title": "Layout Options",
+    "type": "manu",
+    "icon": "fas fa-copy",
+    "link": "#",
+    "isNested": true,
+    "isToggleOpen": false,
+    "nestedItem": [
+      {
+        "title": "Top Navigation",
+        "icon": "far fa-circle",
+        "link": "pages/layout/top-nav.html"
+      },
+      {
+        "title": "Top Navigation + Sidebar",
+        "icon": "far fa-circle",
+        "link": "pages/layout/top-nav-sidebar.html"
+      },
+      {
+        "title": "Boxed",
+        "icon": "far fa-circle",
+        "link": "pages/layout/boxed.html"
+      },
+      {
+        "title": "Fixed Sidebar",
+        "icon": "far fa-circle",
+        "link": "pages/layout/fixed-sidebar.html"
+      },
+      {
+        "title": "Fixed Sidebar + Custom Area",
+        "icon": "far fa-circle",
+        "link": "pages/layout/fixed-sidebar-custom.html"
+      },
+      {
+        "title": "Fixed Navbar",
+        "icon": "far fa-circle",
+        "link": "pages/layout/fixed-topnav.html"
+      },
+      {
+        "title": "Fixed Footer",
+        "icon": "far fa-circle",
+        "link": "pages/layout/fixed-footer.html"
+      },
+      {
+        "title": "Collapsed Sidebar",
+        "icon": "far fa-circle",
+        "link": "pages/layout/collapsed-sidebar.html"
+      }
+    ]
+  },
+  {
+    "title": "Charts",
+    "type": "manu",
+    "icon": "fas fa-chart-pie",
+    "link": "#",
+    "isNested": true,
+    "isToggleOpen": false,
+    "nestedItem": [
+      {
+        "title": "ChartJS",
+        "icon": "far fa-circle",
+        "link": "pages/charts/chartjs.html"
+      },
+      {
+        "title": "Flot",
+        "icon": "far fa-circle",
+        "link": "pages/charts/flot.html"
+      },
+      {
+        "title": "Inline",
+        "icon": "far fa-circle",
+        "link": "pages/charts/inline.html"
+      },
+      {
+        "title": "uPlot",
+        "icon": "far fa-circle",
+        "link": "pages/charts/uplot.html"
+      }
+    ]
+  },
+  {
+    "title": "UI Elements",
+    "type": "manu",
+    "icon": "fas fa-tree",
+    "link": "#",
+    "isNested": true,
+    "isToggleOpen": false,
+    "nestedItem": [
+      {
+        "title": "General",
+        "icon": "far fa-circle",
+        "link": "pages/UI/general.html"
+      },
+      {
+        "title": "Icons",
+        "icon": "far fa-circle",
+        "link": "pages/UI/icons.html"
+      },
+      {
+        "title": "Buttons",
+        "icon": "far fa-circle",
+        "link": "pages/UI/buttons.html"
+      },
+      {
+        "title": "Sliders",
+        "icon": "far fa-circle",
+        "link": "pages/UI/sliders.html"
+      },
+      {
+        "title": "Modals & Alerts",
+        "icon": "far fa-circle",
+        "link": "pages/UI/modals.html"
+      },
+      {
+        "title": "Navbar & Tabs",
+        "icon": "far fa-circle",
+        "link": "pages/UI/navbar.html"
+      },
+      {
+        "title": "Timeline",
+        "icon": "far fa-circle",
+        "link": "pages/UI/timeline.html"
+      },
+      {
+        "title": "Ribbons",
+        "icon": "far fa-circle",
+        "link": "pages/UI/ribbons.html"
+      }
+    ]
+  },
+  {
+    "title": "Forms",
+    "type": "manu",
+    "icon": "fas fa-edit",
+    "link": "#",
+    "isNested": true,
+    "isToggleOpen": false,
+    "nestedItem": [
+      {
+        "title": "General Elements",
+        "icon": "far fa-circle",
+        "link": "pages/forms/general.html"
+      },
+      {
+        "title": "Advanced Elements",
+        "icon": "far fa-circle",
+        "link": "pages/forms/advanced.html"
+      },
+      {
+        "title": "Editors",
+        "icon": "far fa-circle",
+        "link": "pages/forms/editors.html"
+      },
+      {
+        "title": "Validation",
+        "icon": "far fa-circle",
+        "link": "pages/forms/validation.html"
+      }
+    ]
+  },
+  {
+    "title": "Tables",
+    "type": "manu",
+    "icon": "fas fa-table",
+    "link": "#",
+    "isNested": true,
+    "isToggleOpen": false,
+    "nestedItem": [
+      {
+        "title": "Simple Tables",
+        "icon": "far fa-circle",
+        "link": "pages/tables/simple.html"
+      },
+      {
+        "title": "DataTables",
+        "icon": "far fa-circle",
+        "link": "pages/tables/data.html"
+      },
+      {
+        "title": "jsGrid",
+        "icon": "far fa-circle",
+        "link": "pages/tables/jsgrid.html"
+      }
+    ]
+  },
+  {
+    "title": "EXAMPLES",
+    "type": "heading"
+  },
+  {
+    "title": "Calendar",
+    "type": "manu",
+    "icon": "far fa-calendar-alt",
+    "link": "pages/calendar.html",
+    "isNested": false
+  },
+  {
+    "title": "Gallery",
+    "type": "manu",
+    "icon": "far fa-image",
+    "link": "pages/gallery.html",
+    "isNested": false
+  },
+  {
+    "title": "Kanban Board",
+    "type": "manu",
+    "icon": "fas fa-columns",
+    "link": "pages/kanban.html",
+    "isNested": false
+  },
+  {
+    "title": "Mailbox",
+    "type": "manu",
+    "icon": "far fa-envelope",
+    "link": "#",
+    "isNested": true,
+    "isToggleOpen": false,
+    "nestedItem": [
+      {
+        "title": "Inbox",
+        "icon": "far fa-circle",
+        "link": "pages/mailbox/mailbox.html"
+      },
+      {
+        "title": "Compose",
+        "icon": "far fa-circle",
+        "link": "pages/mailbox/compose.html"
+      },
+      {
+        "title": "Read",
+        "icon": "far fa-circle",
+        "link": "pages/mailbox/read-mail.html"
+      }
+    ]
+  },
+  {
+    "title": "Pages",
+    "type": "manu",
+    "icon": "fas fa-book",
+    "link": "#",
+    "isNested": true,
+    "isToggleOpen": false,
+    "nestedItem": [
+      {
+        "title": "Invoice",
+        "icon": "far fa-circle",
+        "link": "pages/examples/invoice.html"
+      },
+      {
+        "title": "Profile",
+        "icon": "far fa-circle",
+        "link": "pages/examples/profile.html"
+      },
+      {
+        "title": "E-commerce",
+        "icon": "far fa-circle",
+        "link": "pages/examples/e-commerce.html"
+      },
+      {
+        "title": "Projects",
+        "icon": "far fa-circle",
+        "link": "pages/examples/projects.html"
+      },
+      {
+        "title": "Project Add",
+        "icon": "far fa-circle",
+        "link": "pages/examples/project-add.html"
+      },
+      {
+        "title": "Project Edit",
+        "icon": "far fa-circle",
+        "link": "pages/examples/project-edit.html"
+      },
+      {
+        "title": "Project Detail",
+        "icon": "far fa-circle",
+        "link": "pages/examples/project-detail.html"
+      },
+      {
+        "title": "Contacts",
+        "icon": "far fa-circle",
+        "link": "pages/examples/contacts.html"
+      },
+      {
+        "title": "FAQ",
+        "icon": "far fa-circle",
+        "link": "pages/examples/faq.html"
+      },
+      {
+        "title": "Contact us",
+        "icon": "far fa-circle",
+        "link": "pages/examples/contact-us.html"
+      }
+    ]
+  },
+  {
+    "title": "Extras",
+    "type": "manu",
+    "icon": "far fa-plus-square",
+    "link": "#",
+    "isNested": true,
+    "isToggleOpen": false,
+    "nestedItem": [
+      {
+        "title": "Login & Register v1",
+        "icon": "far fa-circle",
+        "link": "#",
+        "isNested": true,
+        "isToggleOpen": false,
+        "nestedItem": [
+          {
+            "title": "Login v1",
+            "icon": "far fa-circle",
+            "link": "pages/examples/login.html"
+          },
+          {
+            "title": "Register v1",
+            "icon": "far fa-circle",
+            "link": "pages/examples/register.html"
+          },
+          {
+            "title": "Forgot Password v1",
+            "icon": "far fa-circle",
+            "link": "pages/examples/forgot-password.html"
+          },
+          {
+            "title": "Recover Password v1",
+            "icon": "far fa-circle",
+            "link": "pages/examples/recover-password.html"
+          }
+        ]
+      },
+      {
+        "title": "Login & Register v2",
+        "icon": "far fa-circle",
+        "link": "#",
+        "isNested": true,
+        "isToggleOpen": false,
+        "nestedItem": [
+          {
+            "title": "Login v2",
+            "icon": "far fa-circle",
+            "link": "pages/examples/login-v2.html"
+          },
+          {
+            "title": "Register v2",
+            "icon": "far fa-circle",
+            "link": "pages/examples/register-v2.html"
+          },
+          {
+            "title": "Forgot Password v2",
+            "icon": "far fa-circle",
+            "link": "pages/examples/forgot-password-v2.html"
+          },
+          {
+            "title": "Recover Password v2",
+            "icon": "far fa-circle",
+            "link": "pages/examples/recover-password-v2.html"
+          }
+        ]
+      },
+      {
+        "title": "Lockscreen",
+        "icon": "far fa-circle",
+        "link": "pages/examples/lockscreen.html"
+      },
+      {
+        "title": "Legacy User Menu",
+        "icon": "far fa-circle",
+        "link": "pages/examples/legacy-user-menu.html"
+      },
+      {
+        "title": "Language Menu",
+        "icon": "far fa-circle",
+        "link": "pages/examples/language-menu.html"
+      },
+      {
+        "title": "Error 404",
+        "icon": "far fa-circle",
+        "link": "pages/examples/404.html"
+      },
+      {
+        "title": "Error 500",
+        "icon": "far fa-circle",
+        "link": "pages/examples/500.html"
+      },
+      {
+        "title": "Pace",
+        "icon": "far fa-circle",
+        "link": "pages/examples/pace.html"
+      },
+      {
+        "title": "Blank Page",
+        "icon": "far fa-circle",
+        "link": "pages/examples/blank.html"
+      },
+      {
+        "title": "Starter Page",
+        "icon": "far fa-circle",
+        "link": "starter.html"
+      }
+    ]
+  },
+  {
+    "title": "Search",
+    "type": "manu",
+    "icon": "fas fa-search",
+    "link": "#",
+    "isNested": true,
+    "isToggleOpen": false,
+    "nestedItem": [
+      {
+        "title": "Simple Search",
+        "icon": "far fa-circle",
+        "link": "pages/search/simple.html"
+      },
+      {
+        "title": "Enhanced",
+        "icon": "far fa-circle",
+        "link": "pages/search/enhanced.html"
+      }
+    ]
+  },
+  {
+    "title": "MISCELLANEOUS",
+    "type": "heading"
+  },
+  {
+    "title": "Tabbed IFrame Plugin",
+    "type": "manu",
+    "icon": "fas fa-ellipsis-h",
+    "link": "iframe.html",
+    "isNested": false
+  },
+  {
+    "title": "Documentation",
+    "type": "manu",
+    "icon": "fas fa-file",
+    "link": "https://adminlte.io/docs/3.1/",
+    "isNested": false
+  },
+  {
+    "title": "MULTI LEVEL EXAMPLE",
+    "type": "heading"
+  },
+  {
+    "title": "Level 1",
+    "type": "manu",
+    "icon": "fas fa-circle",
+    "link": "#",
+    "isNested": false
+  },
+  {
+    "title": "Level 1",
+    "type": "manu",
+    "icon": "fas fa-circle",
+    "link": "#",
+    "isNested": true,
+    "isToggleOpen": false,
+    "nestedItem": [
+      {
+        "title": "Level 2",
+        "icon": "far fa-circle",
+        "link": "#"
+      },
+      {
+        "title": "Level 2",
+        "icon": "far fa-circle",
+        "link": "#",
+        "isNested": true,
+        "isToggleOpen": false,
+        "nestedItem": [
+          {
+            "title": "Level 3",
+            "icon": "far fa-dot-circle",
+            "link": "#"
+          },
+          {
+            "title": "Level 3",
+            "icon": "far fa-dot-circle",
+            "link": "#"
+          },
+          {
+            "title": "Level 3",
+            "icon": "far fa-dot-circle",
+            "link": "#"
+          }
+        ]
+      },
+      {
+        "title": "Level 2",
+        "icon": "far fa-circle",
+        "link": "#"
+      }
+    ]
+  },
+  {
+    "title": "Level 1",
+    "type": "manu",
+    "icon": "fas fa-circle",
+    "link": "#",
+    "isNested": false
+  },
+  {
+    "title": "LABELS",
+    "type": "heading"
+  },
+  {
+    "title": "Important",
+    "type": "manu",
+    "icon": "far fa-circle text-danger",
+    "link": "#",
+    "isNested": false
+  },
+  {
+    "title": "Warning",
+    "type": "manu",
+    "icon": "far fa-circle text-warning",
+    "link": "#",
+    "isNested": false
+  },
+  {
+    "title": "Informational",
+    "type": "manu",
+    "icon": "far fa-circle text-info",
+    "link": "#",
+    "isNested": false
+  }
+]
