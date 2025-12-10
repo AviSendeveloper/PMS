@@ -1,69 +1,65 @@
 import React from 'react'
 
-const Table = () => {
+const DEFAULT_ACTION_HEADER_NAME = 'ACTION';
+
+const Table = ({ headers, tableData, onChange, onEdit, onDelete, config = null }) => {
+    const isActionRequired = config?.isAction ? true : false;
+
+    const renderHeaders = () => {
+        const headerItem = Object.values(headers);
+
+        isActionRequired && headerItem.push(config?.actionHeaderName ?? DEFAULT_ACTION_HEADER_NAME)
+
+        console.log(isActionRequired, headerItem);
+
+
+        return headerItem.map((header, index) => {
+            return <th key={`${header}-${index}`}>{header}</th>
+        });
+    }
+
+    const renderData = () => {
+        const headerKeys = Object.keys(headers);
+
+        const editButton = isActionRequired && config?.actionList?.edit && <button type="button" class="btn btn-block btn-primary">Edit</button>;
+        const deleteButton = isActionRequired && config?.actionList?.delete && <button type="button" class="btn btn-block btn-danger">Delete</button>;
+        
+        return tableData.map((row, index) => {
+            return (
+                <tr>
+                    {
+                        headerKeys.map(key => {
+                            return <td key={`${key}-${index}`}>{row[key]}</td>
+                        })
+                    }
+                        <td>{editButton}</td>
+                        <td>{deleteButton}</td>
+                </tr>
+            )
+        })
+    }
+
     return (
         <div className="card">
             <div className="card-body p-0">
                 <table className="table table-striped">
                     <thead>
                         <tr>
-                            <th>#</th>
-                            <th>Task</th>
-                            <th>Progress</th>
-                            <th>Label</th>
+                            {renderHeaders()}
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>1.</td>
-                            <td>Update software</td>
-                            <td>
-                                <div className="progress progress-xs">
-                                    <div className="progress-bar progress-bar-danger" style={{ width: "55%" }}></div>
-                                </div>
-                            </td>
-                            <td><span className="badge bg-danger">55%</span></td>
-                        </tr>
-                        <tr>
-                            <td>2.</td>
-                            <td>Clean database</td>
-                            <td>
-                                <div className="progress progress-xs">
-                                    <div className="progress-bar bg-warning" style={{ width: "70%" }}></div>
-                                </div>
-                            </td>
-                            <td><span className="badge bg-warning">70%</span></td>
-                        </tr>
-                        <tr>
-                            <td>3.</td>
-                            <td>Cron job running</td>
-                            <td>
-                                <div className="progress progress-xs progress-striped active">
-                                    <div className="progress-bar bg-primary" style={{ width: "30%" }}></div>
-                                </div>
-                            </td>
-                            <td><span className="badge bg-primary">30%</span></td>
-                        </tr>
-                        <tr>
-                            <td>4.</td>
-                            <td>Fix and squish bugs</td>
-                            <td>
-                                <div className="progress progress-xs progress-striped active">
-                                    <div className="progress-bar bg-success" style={{ width: "90%" }}></div>
-                                </div>
-                            </td>
-                            <td><span className="badge bg-success">90%</span></td>
-                        </tr>
+                        {renderData()}
                     </tbody>
                 </table>
             </div>
-            <div class="card-footer clearfix">
-                <ul class="pagination pagination-sm m-0 float-right">
-                    <li class="page-item"><a class="page-link" href="#">&laquo;</a></li>
-                    <li class="page-item"><a class="page-link" href="#">1</a></li>
-                    <li class="page-item"><a class="page-link" href="#">2</a></li>
-                    <li class="page-item"><a class="page-link" href="#">3</a></li>
-                    <li class="page-item"><a class="page-link" href="#">&raquo;</a></li>
+            <div className="card-footer clearfix">
+                <ul className="pagination pagination-sm m-0 float-right">
+                    <li className="page-item"><a className="page-link" href="#">&laquo;</a></li>
+                    <li className="page-item"><a className="page-link" href="#">1</a></li>
+                    <li className="page-item"><a className="page-link" href="#">2</a></li>
+                    <li className="page-item"><a className="page-link" href="#">3</a></li>
+                    <li className="page-item"><a className="page-link" href="#">&raquo;</a></li>
                 </ul>
             </div>
         </div>
