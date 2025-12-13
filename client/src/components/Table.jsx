@@ -4,6 +4,8 @@ const DEFAULT_ACTION_HEADER_NAME = 'ACTION';
 
 const Table = ({ headers, tableData, onChange, onEdit, onDelete, config = null }) => {
     const isActionRequired = config?.isAction ? true : false;
+    const isEditEnable = isActionRequired && config?.actionList?.edit;
+    const isDeleteEnable = isActionRequired && config?.actionList?.delete;
 
     const renderHeaders = () => {
         const headerItem = Object.values(headers);
@@ -21,8 +23,8 @@ const Table = ({ headers, tableData, onChange, onEdit, onDelete, config = null }
     const renderData = () => {
         const headerKeys = Object.keys(headers);
 
-        const editButton = isActionRequired && config?.actionList?.edit && <button type="button" class="btn btn-block btn-primary">Edit</button>;
-        const deleteButton = isActionRequired && config?.actionList?.delete && <button type="button" class="btn btn-block btn-danger">Delete</button>;
+        const editButton = isEditEnable && <button type="button" class="btn btn-block btn-sm btn-primary">Edit</button>;
+        const deleteButton = isDeleteEnable && <button type="button" class="btn btn-block btn-sm btn-danger">Delete</button>;
         
         return tableData.map((row, index) => {
             return (
