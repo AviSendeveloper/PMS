@@ -4,8 +4,6 @@ const useClickOutside = (elRef, callback) => {
   useEffect(() => {
     const clickOutside = (event) => {
       if (elRef.current && !elRef.current.contains(event.target)) {
-        console.log("click outside");
-
         callback();
       }
     };
