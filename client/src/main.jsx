@@ -13,13 +13,16 @@ import "../public/plugins/overlayScrollbars/css/OverlayScrollbars.min.css";
 import "../public/plugins/daterangepicker/daterangepicker.css";
 import "../public/plugins/summernote/summernote-bs4.min.css";
 import TheamContextProvider from "./context/TheamContext.jsx";
+import AuthContextProvider from "./context/AuthContext.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <TheamContextProvider>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </TheamContextProvider>
+    <AuthContextProvider>
+      <TheamContextProvider>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </TheamContextProvider>
+    </AuthContextProvider>
   </StrictMode>
 );

@@ -2,6 +2,11 @@ import React, { useState } from "react";
 import Table from "../components/Table";
 import ModalForm from "../components/modals/ModalForm";
 
+const formOperationType = {
+  create: "CREATE",
+  edit: "EDIT",
+};
+
 const staticHeaders = {
   id: "ID",
   name: "NAME",
@@ -87,17 +92,44 @@ const tableConfig = {
 };
 
 const Employee = () => {
-  const [headers, setHeaders] = useState(staticHeaders);
   const [employees, setEmployees] = useState(staicEmployeeData);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
 
   // togle modal
   const [isModalShow, setIsModalShow] = useState(false);
+  // modal operation type like create, edit
+  const [operationType, setOperationType] = useState("");
 
   const handleChange = () => {};
 
-  const handleEdit = () => {};
+  const handleEdit = (employeeDetails) => {
+    setOperationType(formOperationType.edit);
+    setSelectedEmployee(employeeDetails);
+    setIsModalShow(true);
+  };
 
   const handleDelete = () => {};
+
+  const handleSubmit = (fieldValues) => {
+    if (fieldValues.operationType == formOperationType.create) {
+      // create operation
+    } else if (fieldValues.operationType = formOperationType.edit) {
+      // edit operaation
+    }
+    setSelectedEmployee(null);
+    handleModalClose();
+  };
+
+  const handleModalOpen = () => {
+    setOperationType(formOperationType.create);
+    setSelectedEmployee(null);
+    setIsModalShow(true);
+  }
+
+  const handleModalClose = () => {
+    setOperationType("");
+    setIsModalShow(false);
+  };
 
   return (
     <div className="content-wrapper">
@@ -122,7 +154,13 @@ const Employee = () => {
       <section className="content">
         <div className="container-fluid">
           {/* modal */}
-          <ModalForm modalState={isModalShow} setModalState={setIsModalShow} />
+          <ModalForm
+            modalState={isModalShow}
+            handleModalCLose={handleModalClose}
+            initialFieldValues = {selectedEmployee}
+            handleSubmit={handleSubmit}
+            operationType={operationType}
+          />
 
           <div className="row">
             {/* add button */}
@@ -131,7 +169,7 @@ const Employee = () => {
                 type="button"
                 class="btn btn-block btn-sm btn-primary"
                 onClick={() => {
-                  setIsModalShow(true);
+                  handleModalOpen()
                 }}
               >
                 Add Employee
@@ -141,7 +179,7 @@ const Employee = () => {
             {/* list data */}
             <div class="col-md-12">
               <Table
-                headers={headers}
+                headers={staticHeaders}
                 tableData={employees}
                 onChange={handleChange}
                 onEdit={handleEdit}

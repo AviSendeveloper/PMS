@@ -22,20 +22,17 @@ const Table = ({ headers, tableData, onChange, onEdit, onDelete, config = null }
 
     const renderData = () => {
         const headerKeys = Object.keys(headers);
-
-        const editButton = isEditEnable && <button type="button" class="btn btn-block btn-sm btn-primary">Edit</button>;
-        const deleteButton = isDeleteEnable && <button type="button" class="btn btn-block btn-sm btn-danger">Delete</button>;
         
         return tableData.map((row, index) => {
             return (
-                <tr>
+                <tr key={index}>
                     {
                         headerKeys.map(key => {
                             return <td key={`${key}-${index}`}>{row[key]}</td>
                         })
                     }
-                        <td>{editButton}</td>
-                        <td>{deleteButton}</td>
+                        <td>{isEditEnable && <button type="button" class="btn btn-block btn-sm btn-primary" onClick={() => onEdit(row)}>Edit</button>}</td>
+                        <td>{isDeleteEnable && <button type="button" class="btn btn-block btn-sm btn-danger" onClick={() => onDelete(row)}>Delete</button>}</td>
                 </tr>
             )
         })

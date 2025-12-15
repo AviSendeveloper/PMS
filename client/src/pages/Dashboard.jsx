@@ -1,6 +1,6 @@
 import React from 'react'
 
-const Home = () => {
+const Dashboard = () => {
     return (
         <div className="content-wrapper">
             {/* Content Header (Page header) */}
@@ -608,4 +608,4 @@ const Home = () => {
     )
 }
 
-export default Home
+export default Dashboard

@@ -5,17 +5,23 @@ import { ErrorMessage, Field, Form, Formik } from "formik";
 import * as Yup from "yup";
 import ModalFormError from "./ModalFormError";
 
-const ModalForm = ({ modalState, setModalState }) => {
+const ModalForm = ({
+  modalState,
+  handleModalCLose,
+  initialFieldValues,
+  handleSubmit,
+  operationType,
+}) => {
   const initialValues = {
-    name: "",
-    email: "",
+    name: initialFieldValues?.name ?? "",
+    email: initialFieldValues?.email ?? "",
     password: "",
   };
 
   const validationSchema = Yup.object().shape({
-    name: Yup.string("name required"),
-    email: Yup.string().email("Email required"),
-    password: Yup.string().min(6),
+    name: Yup.string().required("name required"),
+    email: Yup.string().email().required("Email required"),
+    password: Yup.string().min(6).required(),
   });
 
   return (
@@ -35,7 +41,7 @@ const ModalForm = ({ modalState, setModalState }) => {
               className="close"
               data-dismiss="modal"
               aria-label="Close"
-              onClick={() => setModalState(false)}
+              onClick={() => handleModalCLose(false)}
             >
               <span aria-hidden="true">&times;</span>
             </button>
@@ -46,70 +52,92 @@ const ModalForm = ({ modalState, setModalState }) => {
             <div className="col-md-12">
               <div className="card card-primary">
                 <Formik
+                  enableReinitialize
                   initialValues={initialValues}
                   validationSchema={validationSchema}
                   onSubmit={(values) => {
                     console.log("submiteed value", values);
+                    values.opretationType = operationType
+                    handleSubmit(values);
                   }}
                 >
-                  <Form>
-                    <div className="card-body">
-                      <div className="form-group">
-                        <label htmlFor="exampleInputName1">Name</label>
-                        <Field
-                          type="input"
-                          className="form-control is-invalid"
-                          id="exampleInputName1"
-                          name="name"
-                          placeholder="Enter name"
-                        />
-                        <ErrorMessage name="name" component={ModalFormError} />
-                      </div>
-                      <div className="form-group">
-                        <label htmlFor="exampleInputEmail1">
-                          Email address
-                        </label>
-                        <Field
-                          type="email"
-                          className="form-control"
-                          id="exampleInputEmail1"
-                          name="email"
-                          placeholder="Enter email"
-                        />
-                        <ErrorMessage name="email" component={ModalFormError} />
-                      </div>
-                      <div className="form-group">
-                        <label htmlFor="exampleInputPassword1">Password</label>
-                        <Field
-                          type="password"
-                          className="form-control"
-                          id="exampleInputPassword1"
-                          name="password"
-                          placeholder="Password"
-                        />
-                        <ErrorMessage
-                          name="password"
-                          component={ModalFormError}
-                        />
-                      </div>
-                      {/* <div className="form-check">
-                        <Field
-                          type="checkbox"
-                          className="form-check-input"
-                          id="exampleCheck1"
-                        />
-                        <label className="form-check-label" htmlFor="exampleCheck1">
-                          Check me out
-                        </label>
-                      </div> */}
-                    </div>
+                  {({ touched, errors }) => {
+                    return (
+                      <Form>
+                        <div className="card-body">
+                          <div className="form-group">
+                            <label htmlFor="exampleInputName1">Name</label>
+                            <Field
+                              type="input"
+                              className={classNames("form-control", {
+                                "is-invalid": touched.name && errors.name,
+                              })}
+                              id="exampleInputName1"
+                              name="name"
+                              placeholder="Enter name"
+                            />
+                            <ErrorMessage
+                              name="name"
+                              component={ModalFormError}
+                            />
+                          </div>
+                          <div className="form-group">
+                            <label htmlFor="exampleInputEmail1">
+                              Email address
+                            </label>
+                            <Field
+                              type="email"
+                              className={classNames("form-control", {
+                                "is-invalid": touched.email && errors.email,
+                              })}
+                              id="exampleInputEmail1"
+                              name="email"
+                              placeholder="Enter email"
+                            />
+                            <ErrorMessage
+                              name="email"
+                              component={ModalFormError}
+                            />
+                          </div>
+                          <div className="form-group">
+                            <label htmlFor="exampleInputPassword1">
+                              Password
+                            </label>
+                            <Field
+                              type="password"
+                              className={classNames("form-control", {
+                                "is-invalid":
+                                  touched.password && errors.password,
+                              })}
+                              id="exampleInputPassword1"
+                              name="password"
+                              placeholder="Password"
+                            />
+                            <ErrorMessage
+                              name="password"
+                              component={ModalFormError}
+                            />
+                          </div>
+                          {/* <div className="form-check">
+                          <Field
+                            type="checkbox"
+                            className="form-check-input"
+                            id="exampleCheck1"
+                          />
+                          <label className="form-check-label" htmlFor="exampleCheck1">
+                            Check me out
+                          </label>
+                        </div> */}
+                        </div>
 
-                    <div className="card-footer">
-                      <button type="submit" className="btn btn-primary">
-                        Submit
-                      </button>
-                    </div>
-                  </Form>
+                        <div className="card-footer">
+                          <button type="submit" className="btn btn-primary">
+                            Submit
+                          </button>
+                        </div>
+                      </Form>
+                    );
+                  }}
                 </Formik>
               </div>
             </div>
@@ -121,7 +149,7 @@ const ModalForm = ({ modalState, setModalState }) => {
               type="button"
               className="btn btn-default"
               data-dismiss="modal"
-              onClick={() => setModalState(false)}
+              onClick={() => handleModalCLose(false)}
             >
               Close
             </button>
