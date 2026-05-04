@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Board — PMS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    .board-wrap{overflow-x:auto;padding-bottom:20px}
+    .board-cols{display:flex;gap:12px;min-width:max-content}
+    .board-col{width:280px;flex-shrink:0;background:var(--bg-surface);border:1px solid var(--bg-border);border-radius:var(--radius-md);display:flex;flex-direction:column;max-height:calc(100vh - 260px)}
+    .col-header{padding:12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--bg-border);flex-shrink:0}
+    .col-count{background:var(--bg-elevated);color:var(--text-muted);border-radius:100px;padding:1px 7px;font-size:11px;font-weight:600}
+    .col-add{margin-left:auto;background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:16px;padding:0 2px;line-height:1}
+    .col-add:hover{color:var(--text-primary)}
+    .col-body{padding:8px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:6px}
+    .col-footer{padding:8px;border-top:1px solid var(--bg-border);flex-shrink:0}
+    .add-issue-ghost{width:100%;background:none;border:none;color:var(--text-muted);font-size:13px;padding:6px 8px;text-align:left;cursor:pointer;border-radius:var(--radius-sm);font-family:var(--font-body)}
+    .add-issue-ghost:hover{background:var(--bg-elevated);color:var(--text-primary)}
+    .issue-card{background:var(--bg-elevated);border:1px solid var(--bg-border);border-radius:var(--radius-sm);padding:10px;cursor:pointer;transition:border-color .12s,transform .1s;position:relative}
+    .issue-card:hover{border-color:var(--accent)}
+    .issue-card.dragging{opacity:.5;transform:rotate(2deg)}
+    .issue-card.drag-over{border-color:var(--accent);background:var(--accent-subtle)}
+    .issue-ident{font-size:11px;color:var(--text-muted);font-family:var(--font-mono);margin-bottom:4px;display:flex;align-items:center;gap:6px}
+    .issue-title{font-size:13px;font-weight:500;color:var(--text-primary);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:6px}
+    .label-chip{font-size:10px;border-radius:100px;padding:1px 7px;background:var(--accent-subtle);color:var(--accent);margin-right:3px}
+    .card-footer-row{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
+    .due-date{font-size:11px;color:var(--text-muted)}
+    .due-date.overdue{color:var(--danger)}
+    .subtask-count{font-size:11px;color:var(--text-muted)}
+    .typing-indicator{font-size:11px;color:var(--text-muted);font-style:italic;padding:4px 0 0}
+    .quick-create{display:none;padding:8px}
+    .quick-create input{background:var(--bg-elevated);border:1px solid var(--accent);border-radius:var(--radius-sm);color:var(--text-primary);padding:7px 10px;font-size:13px;width:100%;font-family:var(--font-body);outline:none}
+    .presence-bar{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-secondary)}
+    .presence-avatar{position:relative;display:inline-block}
+    .presence-dot{width:8px;height:8px;border-radius:50%;background:var(--success);border:2px solid var(--bg-base);position:absolute;bottom:0;right:0}
+    .filter-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+    .filter-avatar{width:28px;height:28px;border-radius:50%;background:var(--bg-elevated);border:2px solid var(--bg-border);color:var(--text-secondary);font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
+    .filter-avatar.selected{border-color:var(--accent);background:var(--accent-subtle);color:var(--accent)}
+    .filter-select{background:var(--bg-elevated);border:1px solid var(--bg-border);border-radius:var(--radius-sm);color:var(--text-primary);padding:5px 28px 5px 10px;font-size:12px;font-family:var(--font-body);outline:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 16 16'%3E%3Cpath fill='%238b949e' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center}
+  </style>
+</head>
+<body>
+<!--
+  REACT CONVERSION NOTES:
+  Component: <ProjectBoard /> → /src/pages/ProjectBoard.jsx
+  Key state: [issues, columns, dragState, filters, presenceUsers, groupBy]
+  API calls: GET /api/projects/:id/issues, PATCH /api/issues/:id/status
+  Child components: <IssueCard />, <BoardColumn />, <FilterBar />, <PresenceBar />, <Topbar />, <Sidebar />
+  Role guard: All roles — manager-up for status transitions
+-->
+<nav class="topbar">
+  <a href="dashboard.html" class="topbar-logo">P<span>M</span>S</a>
+  <button class="workspace-switcher"><span>Acme Corp</span><i class="bi bi-chevron-down" style="font-size:11px"></i></button>
+  <div class="topbar-search"><input type="text" class="search-input" placeholder="Search issues, projects..." onclick="window.location.href='search.html'" readonly /></div>
+  <div class="topbar-actions">
+    <button class="icon-btn" onclick="window.location.href='notifications.html'"><i class="bi bi-bell"></i><span class="notif-badge">3</span></button>
+    <button class="avatar" id="avatarBtn" onclick="toggleAvatarMenu()">AA</button>
+  </div>
+  <div class="dropdown-pms" id="avatarMenu" style="right:8px;top:52px">
+    <a href="profile.html" class="dropdown-item-pms"><i class="bi bi-person"></i>Profile</a>
+    <a href="api-tokens.html" class="dropdown-item-pms"><i class="bi bi-key"></i>API Tokens</a>
+    <div class="dropdown-sep"></div>
+    <a href="auth-login.html" class="dropdown-item-pms danger"><i class="bi bi-box-arrow-right"></i>Sign Out</a>
+  </div>
+</nav>
+<aside class="sidebar">
+  <div class="sidebar-section-label">Main</div>
+  <a href="dashboard.html" class="nav-item"><i class="bi bi-grid-1x2"></i>Dashboard</a>
+  <a href="project-list.html" class="nav-item active"><i class="bi bi-folder"></i>Projects</a>
+  <a href="members-workspace.html" class="nav-item admin-only"><i class="bi bi-people"></i>Members</a>
+  <a href="reports.html" class="nav-item manager-up"><i class="bi bi-bar-chart"></i>Reports</a>
+  <a href="search.html" class="nav-item"><i class="bi bi-search"></i>Search</a>
+  <a href="notifications.html" class="nav-item"><i class="bi bi-bell"></i>Notifications</a>
+  <div class="sidebar-section-label admin-only">Settings</div>
+  <a href="admin-settings.html" class="nav-item admin-only"><i class="bi bi-gear"></i>Workspace</a>
+  <a href="admin-labels.html" class="nav-item admin-only"><i class="bi bi-tags"></i>Labels</a>
+  <a href="admin-webhooks.html" class="nav-item admin-only"><i class="bi bi-link-45deg"></i>Webhooks</a>
+  <a href="api-tokens.html" class="nav-item"><i class="bi bi-key"></i>API Tokens</a>
+  <div class="sidebar-section-label admin-only">System</div>
+  <a href="admin-bull-board.html" class="nav-item admin-only"><i class="bi bi-display"></i>Bull Board</a>
+  <a href="admin-audit-log.html" class="nav-item admin-only"><i class="bi bi-journal-text"></i>Audit Log</a>
+  <div class="sidebar-bottom">
+    <div class="sidebar-user"><div class="avatar avatar-sm" id="sidebarAvatar">AA</div>
+      <div class="sidebar-user-info"><div class="sidebar-user-name" id="sidebarName">Alex Admin</div>
+        <div class="sidebar-user-role"><span class="role-badge-sm" id="sidebarRole">Admin</span></div></div></div>
+  </div>
+</aside>
+<main class="main-wrapper" style="padding-bottom:0">
+  <div class="breadcrumb-pms">
+    <a href="project-list.html">Projects</a><span class="sep">/</span>
+    <a href="project-board.html">Engineering Platform</a><span class="sep">/</span>
+    <span class="current">Board</span>
+  </div>
+  <div class="project-tabs mb-0">
+    <a href="project-board.html" class="project-tab active">Board</a>
+    <a href="project-backlog.html" class="project-tab">Backlog</a>
+    <a href="project-sprints.html" class="project-tab">Sprints</a>
+    <a href="reports.html" class="project-tab manager-up">Reports</a>
+    <a href="project-members.html" class="project-tab manager-up">Members</a>
+    <a href="project-settings.html" class="project-tab manager-up">Settings</a>
+  </div>
+  <div style="padding:16px 0 12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+    <div class="filter-bar" style="margin-bottom:0">
+      <div class="presence-avatar filter-avatar" onclick="this.classList.toggle('selected')" title="Sarah Chen">SC</div>
+      <div class="presence-avatar filter-avatar" onclick="this.classList.toggle('selected')" title="Alex Admin">AA</div>
+      <div class="presence-avatar filter-avatar" onclick="this.classList.toggle('selected')" title="Maria Lopez">ML</div>
+      <div class="presence-avatar filter-avatar" onclick="this.classList.toggle('selected')" title="Tom Singh">TS</div>
+      <select class="filter-select"><option>All Priority</option><option>Urgent</option><option>High</option><option>Medium</option><option>Low</option></select>
+      <select class="filter-select" id="labelFilter"><option>All Labels</option><option>bug</option><option>feature</option><option>docs</option><option>perf</option></select>
+      <select class="filter-select" id="groupBy"><option>Group: Status</option><option>Group: Assignee</option><option>Group: Priority</option></select>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="presence-bar">
+        <span style="color:var(--text-muted)">Online:</span>
+        <div class="presence-avatar" style="position:relative;width:26px;height:26px;margin-right:2px" title="Sarah Chen — viewing this board">
+          <div class="avatar avatar-sm" style="width:26px;height:26px;font-size:9px">SC</div>
+          <div class="presence-dot"></div>
+        </div>
+        <div class="presence-avatar" style="position:relative;width:26px;height:26px;margin-right:2px" title="Tom Singh — viewing this board">
+          <div class="avatar avatar-sm" style="width:26px;height:26px;font-size:9px;background:rgba(63,185,80,.15);color:var(--success)">TS</div>
+          <div class="presence-dot"></div>
+        </div>
+        <div class="presence-avatar" style="position:relative;width:26px;height:26px" title="Maria Lopez — viewing this board">
+          <div class="avatar avatar-sm" style="width:26px;height:26px;font-size:9px;background:rgba(210,153,34,.15);color:var(--warning)">ML</div>
+          <div class="presence-dot"></div>
+        </div>
+      </div>
+      <button class="btn-primary all-roles" onclick="openNewIssueModal()"><i class="bi bi-plus"></i> New Issue</button>
+    </div>
+  </div>
+  <div class="board-wrap">
+    <div class="board-cols" id="boardCols"></div>
+  </div>
+</main>
+
+<!-- New Issue Modal -->
+<div class="modal-overlay" id="newIssueModal">
+  <div class="modal-panel">
+    <div class="modal-header"><h3>New Issue</h3><button class="modal-close" onclick="closeModal('newIssueModal')">✕</button></div>
+    <div class="mb-3"><label for="isTitle">Title</label><input type="text" id="isTitle" class="fcc" placeholder="Issue title..." /></div>
+    <div class="mb-3"><label for="isDesc">Description</label><textarea id="isDesc" class="fcc" rows="3" placeholder="Describe the issue..."></textarea></div>
+    <div class="row g-2 mb-3">
+      <div class="col-6"><label for="isStat">Status</label>
+        <select id="isStat" class="fcc">
+          <option value="backlog">Backlog</option><option value="todo">Todo</option><option value="inprogress">In Progress</option>
+        </select></div>
+      <div class="col-6"><label for="isPrio">Priority</label>
+        <select id="isPrio" class="fcc">
+          <option value="medium">Medium</option><option value="high">High</option><option value="urgent">Urgent</option><option value="low">Low</option>
+        </select></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('newIssueModal')">Cancel</button>
+      <button class="btn-primary" onclick="createIssue()">Create Issue</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal-panel" style="max-width:400px">
+    <div class="modal-header"><h3 id="confirmTitle">Confirm</h3><button class="modal-close" onclick="closeModal('confirmModal')">✕</button></div>
+    <p id="confirmMessage"></p>
+    <div class="modal-footer"><button class="btn-secondary" onclick="closeModal('confirmModal')">Cancel</button><button class="btn-danger" id="confirmBtn">Confirm</button></div>
+  </div>
+</div>
+<div id="toast-container"></div>
+<div class="dev-role-switcher">
+  <span class="dev-role-label">Role:</span>
+  <button class="dev-role-btn" id="devAdmin" onclick="switchRole('admin')">Admin</button>
+  <button class="dev-role-btn" id="devManager" onclick="switchRole('manager')">Manager</button>
+  <button class="dev-role-btn" id="devMember" onclick="switchRole('member')">Member</button>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const COLUMNS = [
+  {id:'backlog',label:'Backlog',status:'status-backlog'},
+  {id:'todo',label:'Todo',status:'status-todo'},
+  {id:'inprogress',label:'In Progress',status:'status-inprogress'},
+  {id:'inreview',label:'In Review',status:'status-inreview'},
+  {id:'done',label:'Done',status:'status-done'},
+  {id:'blocked',label:'Blocked',status:'status-blocked'},
+];
+const MEMBER_BLOCKED_TRANSITIONS = [{from:'done',to:'inprogress'},{from:'blocked',to:'inprogress'}];
+let ISSUES = [
+  {id:1,ident:'ENG-42',title:'Fix authentication bug in OAuth flow',priority:'urgent',status:'inprogress',labels:['bug'],assignee:'SC',due:'Apr 25',overdue:false,subtasks:'2/5'},
+  {id:2,ident:'ENG-38',title:'User onboarding flow redesign',priority:'high',status:'inreview',labels:['feature','design'],assignee:'ML',due:'Apr 28',overdue:false,subtasks:'4/4',typing:true},
+  {id:3,ident:'ENG-45',title:'API rate limiting implementation',priority:'medium',status:'todo',labels:['feature'],assignee:'TS',due:'Apr 30',overdue:false},
+  {id:4,ident:'ENG-31',title:'Dashboard analytics redesign',priority:'high',status:'done',labels:['design'],assignee:'AA',due:'Apr 20',overdue:false},
+  {id:5,ident:'ENG-29',title:'Database connection pool leak',priority:'urgent',status:'blocked',labels:['bug','perf'],assignee:'TS',due:'Apr 22',overdue:true},
+  {id:6,ident:'ENG-46',title:'Performance audit for main API endpoints',priority:'medium',status:'backlog',labels:['perf'],assignee:'SC',due:'May 5',overdue:false},
+  {id:7,ident:'ENG-47',title:'Add dark mode support to settings page',priority:'low',status:'todo',labels:['feature'],assignee:'ML',due:'May 10',overdue:false},
+  {id:8,ident:'ENG-48',title:'Write unit tests for auth module',priority:'medium',status:'inprogress',labels:['docs'],assignee:'AA',due:'Apr 26',overdue:false},
+];
+let ROLE = sessionStorage.getItem('role')||'admin';
+let dragId = null;
+
+function initPage(){
+  document.body.setAttribute('data-role',ROLE);
+  const initials={admin:'AA',manager:'MM',member:'MX'};
+  document.getElementById('avatarBtn').textContent=initials[ROLE]||'AA';
+  document.getElementById('sidebarAvatar').textContent=initials[ROLE]||'AA';
+  const names={admin:'Alex Admin',manager:'Morgan Manager',member:'Max Member'};
+  document.getElementById('sidebarName').textContent=names[ROLE]||'User';
+  document.getElementById('sidebarRole').textContent=ROLE.charAt(0).toUpperCase()+ROLE.slice(1);
+  updateDevBtns();
+  renderBoard();
+}
+
+function renderBoard(){
+  const container=document.getElementById('boardCols');
+  container.innerHTML=COLUMNS.map(col=>{
+    const colIssues=ISSUES.filter(i=>i.status===col.id);
+    const isEmpty=colIssues.length===0;
+    return `<div class="board-col" id="col-${col.id}" ondragover="dragOver(event,this)" ondrop="drop(event,'${col.id}')">
+      <div class="col-header">
+        <span class="${col.status} status-badge">${col.label}</span>
+        <span class="col-count">${colIssues.length}</span>
+        <button class="col-add" onclick="openNewIssueModal('${col.id}')" title="Add issue"><i class="bi bi-plus"></i></button>
+      </div>
+      <div class="col-body">
+        ${isEmpty?`<div class="empty-state" style="padding:24px 0"><i class="bi bi-inbox"></i><p style="margin:8px 0 4px">No issues</p><small>+ Add the first issue</small></div>`:''}
+        ${colIssues.map(issue=>issueCard(issue)).join('')}
+      </div>
+      <div class="col-footer">
+        <button class="add-issue-ghost" onclick="openNewIssueModal('${col.id}')"><i class="bi bi-plus"></i> Add Issue</button>
+      </div>
+    </div>`;
+  }).join('');
+  // re-attach drag events
+  document.querySelectorAll('.issue-card').forEach(card=>{
+    card.addEventListener('dragstart',e=>dragStart(e,parseInt(card.dataset.id)));
+    card.addEventListener('dragend',()=>card.classList.remove('dragging'));
+  });
+}
+
+function issueCard(issue){
+  const labels=issue.labels?issue.labels.slice(0,2).map(l=>`<span class="label-chip">${l}</span>`).join('')+(issue.labels.length>2?`<span class="label-chip">+${issue.labels.length-2}</span>`:''): '';
+  return `<div class="issue-card" id="ic-${issue.id}" data-id="${issue.id}" draggable="true" onclick="window.location.href='issue-detail.html'">
+    <div class="issue-ident">
+      <span class="priority-dot priority-${issue.priority}" title="${issue.priority}"></span>
+      <span>${issue.ident}</span>
+    </div>
+    <div class="issue-title">${issue.title}</div>
+    ${labels?`<div style="margin-bottom:6px">${labels}</div>`:''}
+    <div class="card-footer-row">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="due-date${issue.overdue?' overdue':''}"><i class="bi bi-calendar3"></i> ${issue.due}</span>
+        ${issue.subtasks?`<span class="subtask-count"><i class="bi bi-check2-square"></i> ${issue.subtasks}</span>`:''}
+      </div>
+      <div class="avatar avatar-sm" title="${issue.assignee}">${issue.assignee}</div>
+    </div>
+    ${issue.typing?'<div class="typing-indicator">Maria is typing...</div>':''}
+  </div>`;
+}
+
+// Drag & Drop
+function dragStart(e,id){dragId=id;setTimeout(()=>document.getElementById('ic-'+id)?.classList.add('dragging'),0);}
+function dragOver(e,col){e.preventDefault();col.style.borderColor='var(--accent)';}
+function drop(e,toStatus){
+  e.preventDefault();
+  document.querySelectorAll('.board-col').forEach(c=>c.style.borderColor='');
+  if(dragId===null) return;
+  const issue=ISSUES.find(i=>i.id===dragId);
+  if(!issue) return;
+  if(ROLE==='member'){
+    const blocked=MEMBER_BLOCKED_TRANSITIONS.some(t=>t.from===issue.status&&t.to===toStatus);
+    if(blocked){showToast('Cannot transition from '+issue.status+'. Requires Manager role.','error');dragId=null;return;}
+  }
+  const oldStatus=issue.status;
+  issue.status=toStatus;
+  renderBoard();
+  const label=COLUMNS.find(c=>c.id===toStatus)?.label||toStatus;
+  showToast(`Status updated to ${label}`,'success');
+  dragId=null;
+}
+
+function openNewIssueModal(col){
+  if(col) document.getElementById('isStat').value=col;
+  openModal('newIssueModal');
+}
+function createIssue(){
+  const title=document.getElementById('isTitle').value.trim();
+  if(!title){showToast('Title is required','error');return;}
+  const newId=ISSUES.length+1;
+  ISSUES.push({id:newId,ident:`ENG-${40+newId}`,title,priority:document.getElementById('isPrio').value,status:document.getElementById('isStat').value,labels:[],assignee:'AA',due:'TBD',overdue:false});
+  closeModal('newIssueModal');document.getElementById('isTitle').value='';
+  renderBoard();showToast('Issue created!','success');
+}
+
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function toggleAvatarMenu(){document.getElementById('avatarMenu').classList.toggle('open');}
+document.addEventListener('click',e=>{if(!e.target.closest('#avatarBtn')&&!e.target.closest('#avatarMenu'))document.getElementById('avatarMenu').classList.remove('open');});
+function switchRole(role){ROLE=role;sessionStorage.setItem('role',role);initPage();}
+function updateDevBtns(){['admin','manager','member'].forEach(r=>{document.getElementById('dev'+r.charAt(0).toUpperCase()+r.slice(1)).classList.toggle('active',r===ROLE);});}
+window.showToast=function(msg,type='info'){const c=document.getElementById('toast-container');const t=document.createElement('div');t.className=`toast-pms toast-${type}`;t.innerHTML=`<div class="toast-bar"></div><div class="toast-body">${msg}</div><button class="toast-close" onclick="this.parentElement.remove()">✕</button>`;c.appendChild(t);setTimeout(()=>{t.classList.add('fade-out');setTimeout(()=>t.remove(),200);},3000);};
+window.showConfirm=function({title,message,confirmLabel='Confirm',confirmType='danger',onConfirm}){document.getElementById('confirmTitle').textContent=title;document.getElementById('confirmMessage').textContent=message;const btn=document.getElementById('confirmBtn');btn.textContent=confirmLabel;btn.className=`btn-${confirmType}`;btn.onclick=()=>{closeModal('confirmModal');if(onConfirm)onConfirm();};document.getElementById('confirmModal').classList.add('open');};
+initPage();
+</script>
+</body>
+</html>

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Search — PMS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="_shared.css"/>
+  <style>
+    .search-box-wrap{position:relative;margin-bottom:12px}
+    .search-box-icon{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:20px;pointer-events:none}
+    .search-box{width:100%;background:var(--bg-elevated);border:2px solid var(--bg-border);border-radius:var(--radius-md);color:var(--text-primary);padding:14px 100px 14px 50px;font-size:16px;font-family:var(--font-body);outline:none;transition:border-color .15s,box-shadow .15s}
+    .search-box:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-subtle)}
+    .search-box::placeholder{color:var(--text-muted)}
+    .search-kbd{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-family:var(--font-mono);font-size:11px;background:var(--bg-surface);border:1px solid var(--bg-border);padding:3px 8px;border-radius:var(--radius-sm);color:var(--text-muted)}
+    .chip-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px}
+    .chip{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:100px;border:1px solid var(--bg-border);background:transparent;color:var(--text-secondary);font-size:13px;cursor:pointer;font-family:var(--font-body);transition:all .15s}
+    .chip:hover{background:var(--bg-elevated);color:var(--text-primary)}
+    .chip.active{background:var(--accent-subtle);color:var(--accent);border-color:rgba(47,129,247,.4);font-weight:500}
+    .rgroup{margin-bottom:28px}
+    .rgroup-hd{display:flex;justify-content:space-between;align-items:center;padding-bottom:8px;border-bottom:1px solid var(--bg-border);margin-bottom:4px}
+    .rgroup-title{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.07em}
+    .rgroup-count{font-size:11px;color:var(--text-muted)}
+    .ritem{display:flex;align-items:center;gap:12px;padding:11px 10px;border-radius:var(--radius-sm);cursor:pointer;transition:background .12s;text-decoration:none}
+    .ritem:hover{background:var(--bg-elevated)}
+    .ricon{width:36px;height:36px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+    .rcontent{flex:1;min-width:0}
+    .rtitle{font-size:14px;font-weight:500;color:var(--text-primary);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .rtitle mark{background:rgba(47,129,247,.2);color:var(--accent);padding:0 2px;border-radius:2px;font-style:normal}
+    .rmeta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .rmeta span{font-size:12px;color:var(--text-muted)}
+    .rchev{color:var(--text-muted);font-size:14px;flex-shrink:0}
+    .rec-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--radius-sm);cursor:pointer;transition:background .12s}
+    .rec-item:hover{background:var(--bg-elevated)}
+    .rec-item:hover .rec-del{opacity:1}
+    .rec-text{flex:1;font-size:14px;color:var(--text-primary)}
+    .rec-del{opacity:0;background:none;border:none;color:var(--text-muted);cursor:pointer;padding:0 4px;font-size:14px;transition:opacity .12s}
+    .rec-del:hover{color:var(--danger)}
+    .no-res{text-align:center;padding:80px 0}
+    .no-res i{font-size:48px;color:var(--text-muted)}
+    .no-res h4{font-size:18px;color:var(--text-secondary);margin:16px 0 8px}
+    .no-res p{font-size:14px;color:var(--text-muted);margin:0}
+  </style>
+</head>
+<body>
+<nav class="topbar">
+  <a href="dashboard.html" class="topbar-logo">P<span>M</span>S</a>
+  <button class="workspace-switcher"><span>Acme Corp</span><i class="bi bi-chevron-down" style="font-size:11px"></i></button>
+  <div class="topbar-search"><input type="text" class="search-input" placeholder="Search..." readonly onclick="document.getElementById('sb').focus()"/></div>
+  <div class="topbar-actions">
+    <button class="icon-btn" onclick="window.location.href='notifications.html'"><i class="bi bi-bell"></i><span class="notif-badge">3</span></button>
+    <button class="avatar" id="avatarBtn" onclick="toggleAvatarMenu()">AA</button>
+  </div>
+  <div class="dropdown-pms" id="avatarMenu" style="right:8px;top:52px">
+    <a href="profile.html" class="dropdown-item-pms"><i class="bi bi-person"></i>Profile</a>
+    <a href="api-tokens.html" class="dropdown-item-pms"><i class="bi bi-key"></i>API Tokens</a>
+    <div class="dropdown-sep"></div>
+    <a href="auth-login.html" class="dropdown-item-pms danger"><i class="bi bi-box-arrow-right"></i>Sign Out</a>
+  </div>
+</nav>
+<aside class="sidebar">
+  <div class="sidebar-section-label">Main</div>
+  <a href="dashboard.html" class="nav-item"><i class="bi bi-grid-1x2"></i>Dashboard</a>
+  <a href="project-list.html" class="nav-item"><i class="bi bi-folder"></i>Projects</a>
+  <a href="members-workspace.html" class="nav-item admin-only"><i class="bi bi-people"></i>Members</a>
+  <a href="reports.html" class="nav-item manager-up"><i class="bi bi-bar-chart"></i>Reports</a>
+  <a href="search.html" class="nav-item active"><i class="bi bi-search"></i>Search</a>
+  <a href="notifications.html" class="nav-item"><i class="bi bi-bell"></i>Notifications</a>
+  <div class="sidebar-section-label admin-only">Settings</div>
+  <a href="admin-settings.html" class="nav-item admin-only"><i class="bi bi-gear"></i>Workspace</a>
+  <a href="admin-labels.html" class="nav-item admin-only"><i class="bi bi-tags"></i>Labels</a>
+  <a href="admin-webhooks.html" class="nav-item admin-only"><i class="bi bi-link-45deg"></i>Webhooks</a>
+  <a href="api-tokens.html" class="nav-item"><i class="bi bi-key"></i>API Tokens</a>
+  <div class="sidebar-section-label admin-only">System</div>
+  <a href="admin-bull-board.html" class="nav-item admin-only"><i class="bi bi-display"></i>Bull Board</a>
+  <a href="admin-audit-log.html" class="nav-item admin-only"><i class="bi bi-journal-text"></i>Audit Log</a>
+  <div class="sidebar-bottom">
+    <div class="sidebar-user">
+      <div class="avatar avatar-sm" id="sidebarAvatar">AA</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name" id="sidebarName">Alex Admin</div>
+        <div class="sidebar-user-role"><span class="role-badge-sm" id="sidebarRole">Admin</span></div>
+      </div>
+    </div>
+  </div>
+</aside>
+<main class="main-wrapper">
+  <!-- Page Header -->
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h1 class="mb-1">Search</h1>
+      <p class="mb-0" style="font-size:13px">Find issues, projects, and people across your workspace.</p>
+    </div>
+    <span style="font-size:12px;color:var(--text-muted);background:var(--bg-elevated);border:1px solid var(--bg-border);padding:4px 10px;border-radius:var(--radius-sm);font-family:var(--font-mono)">⌘ K</span>
+  </div>
+
+  <!-- Search Input -->
+  <div class="search-box-wrap">
+    <i class="bi bi-search search-box-icon"></i>
+    <input type="text" id="sb" class="search-box" placeholder="Search issues, projects, people..." autofocus oninput="doSearch(this.value)"/>
+    <span class="search-kbd">⌘K</span>
+  </div>
+
+  <!-- Filter Chips -->
+  <div class="chip-row">
+    <button class="chip active" id="c-all"      onclick="setFilter('all',this)"><i class="bi bi-grid-3x3-gap-fill"></i>All</button>
+    <button class="chip"        id="c-issues"   onclick="setFilter('issues',this)"><i class="bi bi-check2-square"></i>Issues</button>
+    <button class="chip"        id="c-projects" onclick="setFilter('projects',this)"><i class="bi bi-folder"></i>Projects</button>
+    <button class="chip"        id="c-people"   onclick="setFilter('people',this)"><i class="bi bi-person"></i>People</button>
+  </div>
+
+  <!-- Results -->
+  <div id="results"></div>
+</main>
+
+<div id="toast-container"></div>
+<div class="dev-role-switcher">
+  <span class="dev-role-label">Role:</span>
+  <button class="dev-role-btn" id="devAdmin"   onclick="switchRole('admin')">Admin</button>
+  <button class="dev-role-btn" id="devManager" onclick="switchRole('manager')">Manager</button>
+  <button class="dev-role-btn" id="devMember"  onclick="switchRole('member')">Member</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+let ROLE = sessionStorage.getItem('role')||'admin';
+let AF = 'all';
+let recents = ['API rate limit','ENG-42','authentication','sprint 5'];
+
+const ISSUES=[
+  {id:'ENG-42',title:'Fix authentication bug in OAuth flow',status:'inprogress',priority:'urgent',project:'Engineering Platform',type:'bug'},
+  {id:'ENG-48',title:'Write unit tests for auth module',status:'todo',priority:'medium',project:'Engineering Platform',type:'task'},
+  {id:'ENG-45',title:'API rate limiting implementation',status:'todo',priority:'medium',project:'Engineering Platform',type:'feature'},
+  {id:'MOB-12',title:'User auth flow — mobile deep link handling',status:'inprogress',priority:'high',project:'Mobile App v2',type:'feature'},
+  {id:'ENG-38',title:'User onboarding flow redesign',status:'inreview',priority:'low',project:'Engineering Platform',type:'task'},
+];
+const PROJECTS=[
+  {id:'ENG',name:'Engineering Platform',type:'Software',issues:48,updated:'2 hours ago'},
+  {id:'MOB',name:'Mobile App v2',type:'Software',issues:22,updated:'1 day ago'},
+  {id:'MKT',name:'Marketing Q2',type:'Marketing',issues:14,updated:'3 days ago'},
+];
+const PEOPLE=[
+  {name:'Alex Admin',email:'alex@example.com',role:'Admin',ini:'AA'},
+  {name:'Sarah Chen',email:'sarah@example.com',role:'Member',ini:'SC'},
+  {name:'Morgan Manager',email:'morgan@example.com',role:'Manager',ini:'MM'},
+];
+const IBGS={bug:'rgba(248,81,73,.1)',feature:'rgba(63,185,80,.1)',task:'rgba(47,129,247,.1)'};
+const ICOS={bug:'var(--danger)',feature:'var(--success)',task:'var(--accent)'};
+const IICO={bug:'bi-bug',feature:'bi-star',task:'bi-check2-square'};
+const SLBL={inprogress:'In Progress',inreview:'In Review',todo:'To Do',done:'Done',blocked:'Blocked'};
+
+function initPage(){
+  document.body.setAttribute('data-role',ROLE);
+  const I={admin:'AA',manager:'MM',member:'MX'};
+  const N={admin:'Alex Admin',manager:'Morgan Manager',member:'Max Member'};
+  document.getElementById('avatarBtn').textContent=I[ROLE];
+  document.getElementById('sidebarAvatar').textContent=I[ROLE];
+  document.getElementById('sidebarName').textContent=N[ROLE];
+  document.getElementById('sidebarRole').textContent=ROLE.charAt(0).toUpperCase()+ROLE.slice(1);
+  updateDevBtns(); renderDefault();
+}
+
+function renderDefault(){
+  const rec = recents.length
+    ? recents.map(s=>`<div class="rec-item" onclick="fill('${s}')"><i class="bi bi-clock" style="color:var(--text-muted);font-size:14px"></i><span class="rec-text">${s}</span><button class="rec-del" onclick="event.stopPropagation();rmRec('${s}')"><i class="bi bi-x"></i></button></div>`).join('')
+    : `<p style="font-size:13px;color:var(--text-muted);padding:8px 10px;margin:0">No recent searches.</p>`;
+  document.getElementById('results').innerHTML=`
+    <div class="rgroup">
+      <div class="rgroup-hd"><span class="rgroup-title">Recent Searches</span><button class="btn-ghost" style="padding:0;font-size:12px;color:var(--text-muted)" onclick="recents=[];renderDefault()">Clear all</button></div>
+      ${rec}
+    </div>
+    <div class="rgroup">
+      <div class="rgroup-hd"><span class="rgroup-title">Quick Jump</span></div>
+      <a class="ritem" href="project-board.html"><div class="ricon" style="background:var(--accent-subtle);color:var(--accent)"><i class="bi bi-kanban"></i></div><div class="rcontent"><div class="rtitle">Engineering Platform → Board</div><div class="rmeta"><span>Active Sprint 5</span><span>·</span><span>8/14 done</span></div></div><i class="bi bi-arrow-right rchev"></i></a>
+      <a class="ritem" href="project-backlog.html"><div class="ricon" style="background:rgba(210,153,34,.1);color:var(--warning)"><i class="bi bi-list-task"></i></div><div class="rcontent"><div class="rtitle">Engineering Platform → Backlog</div><div class="rmeta"><span>3 unassigned issues</span></div></div><i class="bi bi-arrow-right rchev"></i></a>
+      <a class="ritem" href="members-workspace.html"><div class="ricon" style="background:rgba(63,185,80,.1);color:var(--success)"><i class="bi bi-people"></i></div><div class="rcontent"><div class="rtitle">Workspace Members</div><div class="rmeta"><span>24 members</span></div></div><i class="bi bi-arrow-right rchev"></i></a>
+    </div>`;
+}
+
+function fill(s){document.getElementById('sb').value=s;doSearch(s);}
+function rmRec(s){recents=recents.filter(r=>r!==s);renderDefault();}
+
+function hl(t,q){if(!q)return t;return t.replace(new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`,`gi`),'<mark>$1</mark>');}
+
+function setFilter(f,el){
+  AF=f;
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  const q=document.getElementById('sb').value.trim();
+  if(q)doSearch(q); else renderDefault();
+}
+
+function doSearch(q){
+  q=q.trim();
+  if(!q){renderDefault();return;}
+  if(!recents.includes(q)){recents.unshift(q);if(recents.length>6)recents.pop();}
+  const showAll=AF==='all';
+  const fi=(showAll||AF==='issues')?ISSUES.filter(i=>i.title.toLowerCase().includes(q.toLowerCase())||i.id.toLowerCase().includes(q.toLowerCase())):[];
+  const fp=(showAll||AF==='projects')?PROJECTS.filter(p=>p.name.toLowerCase().includes(q.toLowerCase())||p.id.toLowerCase().includes(q.toLowerCase())):[];
+  const fm=(showAll||AF==='people')?PEOPLE.filter(p=>p.name.toLowerCase().includes(q.toLowerCase())||p.email.toLowerCase().includes(q.toLowerCase())):[];
+  if(!fi.length&&!fp.length&&!fm.length){document.getElementById('results').innerHTML=`<div class="no-res"><i class="bi bi-search"></i><h4>No results for "${q}"</h4><p>Try a different search term or adjust the filter.</p></div>`;return;}
+  let html='';
+  if(fi.length)html+=`<div class="rgroup"><div class="rgroup-hd"><span class="rgroup-title">Issues</span><span class="rgroup-count">${fi.length} result${fi.length>1?'s':''}</span></div>${fi.map(i=>`
+    <a class="ritem" href="issue-detail.html">
+      <div class="ricon" style="background:${IBGS[i.type]||'var(--bg-elevated)'};color:${ICOS[i.type]||'var(--text-secondary)'}"><i class="bi ${IICO[i.type]||'bi-circle'}"></i></div>
+      <div class="rcontent">
+        <div class="rtitle">${hl(i.title,q)}</div>
+        <div class="rmeta"><span class="mono" style="color:var(--text-muted)">${i.id}</span><span>·</span><span>${i.project}</span><span>·</span><span class="status-badge status-${i.status}" style="font-size:10px;padding:1px 7px">${SLBL[i.status]||i.status}</span><span style="display:inline-flex;align-items:center;gap:4px"><span class="priority-dot priority-${i.priority}"></span>${i.priority}</span></div>
+      </div>
+      <i class="bi bi-arrow-right rchev"></i>
+    </a>`).join('')}</div>`;
+  if(fp.length)html+=`<div class="rgroup"><div class="rgroup-hd"><span class="rgroup-title">Projects</span><span class="rgroup-count">${fp.length} result${fp.length>1?'s':''}</span></div>${fp.map(p=>`
+    <a class="ritem" href="project-board.html">
+      <div class="ricon" style="background:rgba(210,153,34,.1);color:var(--warning)"><i class="bi bi-folder"></i></div>
+      <div class="rcontent">
+        <div class="rtitle">${hl(p.name,q)}</div>
+        <div class="rmeta"><span class="mono" style="color:var(--text-muted)">${p.id}</span><span>·</span><span>${p.type}</span><span>·</span><span>${p.issues} issues</span><span>·</span><span>Updated ${p.updated}</span></div>
+      </div>
+      <i class="bi bi-arrow-right rchev"></i>
+    </a>`).join('')}</div>`;
+  if(fm.length)html+=`<div class="rgroup"><div class="rgroup-hd"><span class="rgroup-title">People</span><span class="rgroup-count">${fm.length} result${fm.length>1?'s':''}</span></div>${fm.map(p=>`
+    <div class="ritem">
+      <div class="avatar" style="width:36px;height:36px;font-size:13px;flex-shrink:0">${p.ini}</div>
+      <div class="rcontent">
+        <div class="rtitle">${hl(p.name,q)}</div>
+        <div class="rmeta"><span>${hl(p.email,q)}</span><span>·</span><span class="role-badge-sm">${p.role}</span></div>
+      </div>
+      <i class="bi bi-arrow-right rchev"></i>
+    </div>`).join('')}</div>`;
+  document.getElementById('results').innerHTML=html;
+}
+
+function toggleAvatarMenu(){document.getElementById('avatarMenu').classList.toggle('open');}
+document.addEventListener('click',e=>{if(!e.target.closest('#avatarBtn')&&!e.target.closest('#avatarMenu'))document.getElementById('avatarMenu').classList.remove('open');});
+function switchRole(r){ROLE=r;sessionStorage.setItem('role',r);initPage();}
+function updateDevBtns(){['admin','manager','member'].forEach(r=>document.getElementById('dev'+r.charAt(0).toUpperCase()+r.slice(1)).classList.toggle('active',r===ROLE));}
+window.showToast=function(msg,type='info'){const c=document.getElementById('toast-container');const t=document.createElement('div');t.className=`toast-pms toast-${type}`;t.innerHTML=`<div class="toast-bar"></div><div class="toast-body">${msg}</div><button class="toast-close" onclick="this.parentElement.remove()">✕</button>`;c.appendChild(t);setTimeout(()=>{t.classList.add('fade-out');setTimeout(()=>t.remove(),200);},3000);};
+document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();document.getElementById('sb').focus();}});
+initPage();
+</script>
+</body>
+</html>

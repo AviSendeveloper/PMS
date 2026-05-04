@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register — PMS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+  <style>
+    :root{--bg-base:#0f1117;--bg-surface:#161b22;--bg-elevated:#1c2333;--bg-border:#30363d;--text-primary:#e6edf3;--text-secondary:#8b949e;--text-muted:#484f58;--accent:#2f81f7;--accent-subtle:rgba(47,129,247,0.12);--success:#3fb950;--warning:#d29922;--danger:#f85149;--font-body:"DM Sans",sans-serif;--font-mono:"DM Mono",monospace;--radius-sm:4px;--radius-md:8px;--radius-lg:12px}
+    *,*::before,*::after{box-sizing:border-box}
+    body{font-family:var(--font-body);background:var(--bg-base);color:var(--text-primary);font-size:14px;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative}
+    body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle,var(--bg-border) 1px,transparent 1px);background-size:28px 28px;opacity:.35;pointer-events:none}
+    h2{font-size:20px;font-weight:600;color:var(--text-primary)}
+    p{font-size:14px;color:var(--text-secondary);line-height:1.6}
+    label{font-size:12px;font-weight:500;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;display:block}
+    .auth-logo{font-size:20px;font-weight:700;color:var(--text-primary);margin-bottom:20px;text-align:center;position:relative;z-index:1}
+    .auth-logo span{color:var(--accent)}
+    .auth-card{background:var(--bg-surface);border:1px solid var(--bg-border);border-radius:var(--radius-lg);padding:40px;width:400px;max-width:90vw;position:relative;z-index:1}
+    .fcc{background:var(--bg-elevated);border:1px solid var(--bg-border);border-radius:var(--radius-sm);color:var(--text-primary);padding:8px 12px;font-size:14px;width:100%;font-family:var(--font-body);outline:none;transition:border-color .15s,box-shadow .15s}
+    .fcc:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-subtle)}
+    .fcc::placeholder{color:var(--text-muted)}
+    .fcc.err{border-color:var(--danger)}
+    .iw{position:relative}
+    .iw .tpw{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;padding:0;font-size:15px}
+    .iw .tpw:hover{color:var(--text-secondary)}
+    .btn-p{background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);padding:8px 14px;font-size:14px;font-weight:500;width:100%;cursor:pointer;transition:opacity .15s;font-family:var(--font-body)}
+    .btn-p:hover:not(:disabled){opacity:.88}
+    .btn-p:disabled{opacity:.45;cursor:not-allowed}
+    .auth-footer{margin-top:20px;text-align:center;font-size:13px;color:var(--text-secondary)}
+    .auth-footer a{color:var(--accent);text-decoration:none;font-weight:500}
+    .auth-footer a:hover{text-decoration:underline}
+    .auth-caption{margin-top:14px;text-align:center;font-size:11px;color:var(--text-muted)}
+    .fg{margin-bottom:16px}
+    .errmsg{font-size:12px;color:var(--danger);margin-top:4px;display:none}
+    .pw-str{height:3px;border-radius:2px;margin-top:6px;background:var(--bg-border);overflow:hidden}
+    .pw-str-bar{height:100%;border-radius:2px;transition:width .3s,background .3s;width:0}
+    .spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+  </style>
+</head>
+<body>
+  <div class="auth-logo">P<span>M</span>S</div>
+  <div class="auth-card">
+    <h2 class="mb-1">Create your account</h2>
+    <p class="mb-4">Start managing projects with your team.</p>
+    <form id="regForm" novalidate>
+      <div class="fg"><label for="fullName">Full Name</label>
+        <input type="text" id="fullName" class="fcc" placeholder="Jane Smith" />
+        <div class="errmsg" id="nameErr">Full name is required.</div></div>
+      <div class="fg"><label for="email">Email</label>
+        <input type="email" id="email" class="fcc" placeholder="you@example.com" />
+        <div class="errmsg" id="emailErr">Enter a valid email address.</div></div>
+      <div class="fg"><label for="password">Password</label>
+        <div class="iw"><input type="password" id="password" class="fcc" placeholder="Min. 8 characters" style="padding-right:36px" />
+          <button type="button" class="tpw" id="tp1" tabindex="-1"><i class="bi bi-eye-slash"></i></button></div>
+        <div class="pw-str"><div class="pw-str-bar" id="pwBar"></div></div>
+        <div class="errmsg" id="pwErr">Password must be at least 8 characters.</div></div>
+      <div class="fg"><label for="cpw">Confirm Password</label>
+        <div class="iw"><input type="password" id="cpw" class="fcc" placeholder="Repeat password" style="padding-right:36px" />
+          <button type="button" class="tpw" id="tp2" tabindex="-1"><i class="bi bi-eye-slash"></i></button></div>
+        <div class="errmsg" id="cpwErr">Passwords do not match.</div></div>
+      <button type="submit" class="btn-p" id="createBtn" disabled>Create Account</button>
+    </form>
+    <div class="auth-footer">Already have an account? <a href="auth-login.html">Sign in</a></div>
+    <div class="auth-caption">By signing up you agree to our Terms of Service.</div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    function tpw(fid,bid){document.getElementById(bid).addEventListener('click',()=>{const i=document.getElementById(fid),ic=document.querySelector('#'+bid+' i');i.type=i.type==='password'?'text':'password';ic.className=i.type==='password'?'bi bi-eye-slash':'bi bi-eye'})}
+    tpw('password','tp1');tpw('cpw','tp2');
+    const F={n:document.getElementById('fullName'),e:document.getElementById('email'),p:document.getElementById('password'),c:document.getElementById('cpw')};
+    const btn=document.getElementById('createBtn');
+    F.p.addEventListener('input',()=>{
+      const v=F.p.value,bar=document.getElementById('pwBar');
+      let s=0;if(v.length>=8)s++;if(/[A-Z]/.test(v))s++;if(/[0-9]/.test(v))s++;if(/[^A-Za-z0-9]/.test(v))s++;
+      bar.style.width=(s/4*100)+'%';bar.style.background=s<=1?'var(--danger)':s===2?'var(--warning)':'var(--success)';
+      chk(false);
+    });
+    Object.values(F).forEach(f=>f.addEventListener('input',()=>chk(false)));
+    function chk(show){
+      const nOk=F.n.value.trim().length>0,eOk=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(F.e.value.trim()),pOk=F.p.value.length>=8,cOk=F.p.value===F.c.value&&F.c.value.length>0;
+      if(show){
+        document.getElementById('nameErr').style.display=nOk?'none':'block';
+        document.getElementById('emailErr').style.display=eOk?'none':'block';
+        document.getElementById('pwErr').style.display=pOk?'none':'block';
+        document.getElementById('cpwErr').style.display=cOk?'none':'block';
+      }
+      btn.disabled=!(nOk&&eOk&&pOk&&cOk);return nOk&&eOk&&pOk&&cOk;
+    }
+    document.getElementById('regForm').addEventListener('submit',e=>{
+      e.preventDefault();if(!chk(true))return;
+      btn.innerHTML='<span class="spin"></span>Creating account...';btn.disabled=true;
+      setTimeout(()=>{
+        sessionStorage.setItem('role','admin');
+        const name=F.n.value.trim(),ini=name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+        sessionStorage.setItem('user',JSON.stringify({name,initials:ini,role:'admin'}));
+        const params=new URLSearchParams(window.location.search);
+        window.location.href=params.get('invite')?'auth-invite-accept.html':'onboarding-create-workspace.html';
+      },1200);
+    });
+  </script>
+</body>
+</html>

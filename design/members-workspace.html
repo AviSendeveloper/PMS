@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Workspace Members — PMS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    .badge-btn { background: var(--bg-elevated); border: 1px solid var(--bg-border); color: var(--text-primary); border-radius: 100px; padding: 2px 10px; font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: border-color .15s; }
+    .badge-btn:hover { border-color: var(--accent); }
+    .badge-btn.admin { color: var(--accent); background: var(--accent-subtle); border-color: transparent; }
+    .badge-btn.manager { color: var(--warning); background: rgba(210,153,34,0.15); border-color: transparent; }
+    .badge-btn.member { color: var(--text-primary); }
+    .three-dot { background: none; border: none; color: var(--text-muted); padding: 4px; border-radius: var(--radius-sm); font-size: 16px; line-height: 1; cursor: pointer; transition: all .15s; }
+    .three-dot:hover { background: var(--bg-elevated); color: var(--text-primary); }
+    .role-menu { position: absolute; right: 0; top: 24px; z-index: 100; min-width: 140px; }
+  </style>
+</head>
+<body>
+<!--
+  REACT CONVERSION NOTES:
+  Component: <WorkspaceMembers /> → /src/pages/WorkspaceMembers.jsx
+  Key state: [members, invites, suspended, activeTab]
+  Role guard: Admin only (Manager/Member redirect or see 403)
+-->
+<nav class="topbar">
+  <a href="dashboard.html" class="topbar-logo">P<span>M</span>S</a>
+  <button class="workspace-switcher"><span>Acme Corp</span><i class="bi bi-chevron-down" style="font-size:11px"></i></button>
+  <div class="topbar-search"><input type="text" class="search-input" placeholder="Search..." readonly /></div>
+  <div class="topbar-actions">
+    <button class="icon-btn"><i class="bi bi-bell"></i></button>
+    <button class="avatar" id="avatarBtn" onclick="toggleAvatarMenu()">AA</button>
+  </div>
+  <div class="dropdown-pms" id="avatarMenu" style="right:8px;top:52px">
+    <a href="profile.html" class="dropdown-item-pms"><i class="bi bi-person"></i>Profile</a>
+    <a href="auth-login.html" class="dropdown-item-pms danger"><i class="bi bi-box-arrow-right"></i>Sign Out</a>
+  </div>
+</nav>
+<aside class="sidebar">
+  <div class="sidebar-section-label">Main</div>
+  <a href="dashboard.html" class="nav-item"><i class="bi bi-grid-1x2"></i>Dashboard</a>
+  <a href="project-list.html" class="nav-item"><i class="bi bi-folder"></i>Projects</a>
+  <a href="members-workspace.html" class="nav-item active admin-only"><i class="bi bi-people"></i>Members</a>
+  <a href="search.html" class="nav-item"><i class="bi bi-search"></i>Search</a>
+  <div class="sidebar-section-label admin-only">Settings</div>
+  <a href="admin-settings.html" class="nav-item admin-only"><i class="bi bi-gear"></i>Workspace</a>
+  <div class="sidebar-bottom">
+    <div class="sidebar-user"><div class="avatar avatar-sm" id="sidebarAvatar">AA</div>
+      <div class="sidebar-user-info"><div class="sidebar-user-name" id="sidebarName">Alex Admin</div>
+        <div class="sidebar-user-role"><span class="role-badge-sm" id="sidebarRole">Admin</span></div></div></div>
+  </div>
+</aside>
+<main class="main-wrapper">
+  <!-- RBAC Block View -->
+  <div id="rbacBlock" style="display:none; text-align:center; padding-top:10vh">
+    <i class="bi bi-shield-lock" style="font-size:64px;color:var(--danger)"></i>
+    <h2 class="mt-3">Admin Access Required</h2>
+    <p>Only workspace administrators can manage members.</p>
+    <a href="dashboard.html" class="btn-primary" style="display:inline-block;margin-top:16px;text-decoration:none">Go to Dashboard</a>
+  </div>
+
+  <div id="pageContent">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <h1 class="mb-0">Workspace Members</h1>
+      <button class="btn-primary" onclick="openModal('inviteModal')"><i class="bi bi-person-plus"></i> Invite Member</button>
+    </div>
+    
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <div class="tab-bar mb-0" style="flex:1">
+        <a class="tab-item active" onclick="switchTab('active',this)">Active (3)</a>
+        <a class="tab-item" onclick="switchTab('pending',this)">Pending Invites (1)</a>
+        <a class="tab-item" onclick="switchTab('suspended',this)">Suspended (1)</a>
+      </div>
+      <div style="width:240px">
+        <input type="text" class="fcc" placeholder="Search members..." />
+      </div>
+    </div>
+
+    <!-- Active Tab -->
+    <div id="tab-active" class="card-pms">
+      <table class="tbl">
+        <thead>
+          <tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Joined</th><th style="width:40px"></th></tr>
+        </thead>
+        <tbody id="activeBody">
+          <!-- Rendered by JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pending Tab -->
+    <div id="tab-pending" class="card-pms" style="display:none">
+      <table class="tbl">
+        <thead>
+          <tr><th>Email</th><th>Role</th><th>Invited By</th><th>Sent</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>jane@example.com</td>
+            <td><span class="badge-btn manager" style="cursor:default">Manager</span></td>
+            <td>Alex Admin</td>
+            <td style="color:var(--text-muted)">2 days ago</td>
+            <td>
+              <div style="display:flex;gap:8px">
+                <button class="btn-ghost" style="padding:4px 8px;font-size:12px" onclick="showToast('Invitation resent','success')">Resend</button>
+                <button class="btn-ghost" style="padding:4px 8px;font-size:12px;color:var(--danger)" onclick="showToast('Invitation cancelled','warning')">Cancel</button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Suspended Tab -->
+    <div id="tab-suspended" class="card-pms" style="display:none">
+      <table class="tbl">
+        <thead>
+          <tr><th>Name</th><th>Email</th><th>Suspended By</th><th>Date</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><div class="d-flex align-items-center gap-2"><div class="avatar avatar-sm">DK</div> Dan Kelly</div></td>
+            <td style="color:var(--text-secondary)">dan@example.com</td>
+            <td>Alex Admin</td>
+            <td style="color:var(--text-muted)">Mar 15, 2026</td>
+            <td><button class="btn-secondary" style="font-size:12px;padding:4px 10px" onclick="showToast('Member reactivated','success')">Reactivate</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<!-- Invite Modal -->
+<div class="modal-overlay" id="inviteModal">
+  <div class="modal-panel">
+    <div class="modal-header"><h3>Invite to Workspace</h3><button class="modal-close" onclick="closeModal('inviteModal')">✕</button></div>
+    <div class="mb-3"><label>Email Address</label><input type="email" class="fcc" id="inviteEmail" placeholder="colleague@company.com" /></div>
+    <div class="mb-4"><label>Workspace Role</label>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;text-transform:none;letter-spacing:0"><input type="radio" name="invRole" value="member" checked /> <div><div style="font-size:13px;color:var(--text-primary)">Member</div><div style="font-size:12px;color:var(--text-muted);font-weight:400">Can view and interact with assigned projects.</div></div></label>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;text-transform:none;letter-spacing:0"><input type="radio" name="invRole" value="manager" /> <div><div style="font-size:13px;color:var(--text-primary)">Manager</div><div style="font-size:12px;color:var(--text-muted);font-weight:400">Can create projects, sprints, and manage project members.</div></div></label>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;text-transform:none;letter-spacing:0"><input type="radio" name="invRole" value="admin" /> <div><div style="font-size:13px;color:var(--text-primary)">Admin</div><div style="font-size:12px;color:var(--text-muted);font-weight:400">Full access to all workspace settings and billing.</div></div></label>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn-secondary" onclick="closeModal('inviteModal')">Cancel</button><button class="btn-primary" onclick="sendInvite()">Send Invitation</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal-panel" style="max-width:400px">
+    <div class="modal-header"><h3 id="confirmTitle">Confirm</h3><button class="modal-close" onclick="closeModal('confirmModal')">✕</button></div>
+    <p id="confirmMessage"></p>
+    <div class="modal-footer"><button class="btn-secondary" onclick="closeModal('confirmModal')">Cancel</button><button class="btn-danger" id="confirmBtn">Confirm</button></div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<div class="dev-role-switcher">
+  <span class="dev-role-label">Role:</span>
+  <button class="dev-role-btn" id="devAdmin" onclick="switchRole('admin')">Admin</button>
+  <button class="dev-role-btn" id="devManager" onclick="switchRole('manager')">Manager</button>
+  <button class="dev-role-btn" id="devMember" onclick="switchRole('member')">Member</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+let ROLE = sessionStorage.getItem('role')||'admin';
+const MEMBERS = [
+  {id:1, name:'Alex Admin', email:'alex@example.com', role:'admin', initials:'AA', joined:'Jan 10, 2026'},
+  {id:2, name:'Morgan Manager', email:'morgan@example.com', role:'manager', initials:'MM', joined:'Jan 15, 2026'},
+  {id:3, name:'Max Member', email:'max@example.com', role:'member', initials:'MX', joined:'Feb 2, 2026'},
+];
+
+function initPage(){
+  document.body.setAttribute('data-role',ROLE);
+  const isAuth = ROLE==='admin';
+  document.getElementById('rbacBlock').style.display = isAuth ? 'none' : 'block';
+  document.getElementById('pageContent').style.display = isAuth ? 'block' : 'none';
+  
+  if(!isAuth) { updateDevBtns(); return; }
+
+  const initials={admin:'AA',manager:'MM',member:'MX'};
+  document.getElementById('avatarBtn').textContent=initials[ROLE];
+  document.getElementById('sidebarAvatar').textContent=initials[ROLE];
+  const names={admin:'Alex Admin',manager:'Morgan Manager',member:'Max Member'};
+  document.getElementById('sidebarName').textContent=names[ROLE];
+  document.getElementById('sidebarRole').textContent=ROLE.charAt(0).toUpperCase()+ROLE.slice(1);
+  updateDevBtns();
+  renderActive();
+}
+
+function renderActive(){
+  document.getElementById('activeBody').innerHTML = MEMBERS.map(m=>`
+    <tr>
+      <td><div class="d-flex align-items-center gap-2"><div class="avatar avatar-sm">${m.initials}</div> ${m.name}</div></td>
+      <td style="color:var(--text-secondary)">${m.email}</td>
+      <td>
+        <div style="position:relative">
+          <button class="badge-btn ${m.role}" onclick="toggleRoleMenu(event, ${m.id})">${m.role.charAt(0).toUpperCase()+m.role.slice(1)} <i class="bi bi-chevron-down" style="font-size:10px"></i></button>
+          <div class="dropdown-pms role-menu" id="rm-${m.id}">
+            <div class="dropdown-item-pms" onclick="changeRole(${m.id},'admin')">Admin</div>
+            <div class="dropdown-item-pms" onclick="changeRole(${m.id},'manager')">Manager</div>
+            <div class="dropdown-item-pms" onclick="changeRole(${m.id},'member')">Member</div>
+          </div>
+        </div>
+      </td>
+      <td><span class="status-badge status-done">Active</span></td>
+      <td style="color:var(--text-muted)">${m.joined}</td>
+      <td>
+        <div style="position:relative;text-align:right">
+          <button class="three-dot" onclick="toggleActionMenu(event, ${m.id})">···</button>
+          <div class="dropdown-pms role-menu" id="am-${m.id}" style="text-align:left">
+            <div class="dropdown-item-pms warning" onclick="suspend(${m.id})"><i class="bi bi-pause-circle"></i> Suspend</div>
+            <div class="dropdown-item-pms danger" onclick="remove(${m.id})"><i class="bi bi-person-x"></i> Remove</div>
+          </div>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+function toggleRoleMenu(e, id){ e.stopPropagation(); hideMenus(); document.getElementById('rm-'+id).classList.toggle('open'); }
+function toggleActionMenu(e, id){ e.stopPropagation(); hideMenus(); document.getElementById('am-'+id).classList.toggle('open'); }
+function hideMenus(){ document.querySelectorAll('.role-menu').forEach(m=>m.classList.remove('open')); }
+document.addEventListener('click', hideMenus);
+
+function changeRole(id, newRole){
+  const m = MEMBERS.find(x=>x.id===id);
+  if(id===1 && newRole!=='admin' && MEMBERS.filter(x=>x.role==='admin').length===1){
+    showConfirm({title:'Action Blocked', message:'You are the only Admin. Promote another member to Admin first before demoting yourself.', confirmLabel:'OK', confirmType:'secondary'});
+    return;
+  }
+  showConfirm({title:'Change Role', message:`Change ${m.name}'s role to ${newRole.charAt(0).toUpperCase()+newRole.slice(1)}?`, confirmLabel:'Change Role', confirmType:'primary', onConfirm:()=>{
+    m.role = newRole; renderActive(); showToast('Role updated','success');
+  }});
+}
+function suspend(id){ showConfirm({title:'Suspend Member', message:'Suspended members cannot log in.', confirmLabel:'Suspend', confirmType:'warning', onConfirm:()=>{ showToast('Member suspended','warning'); }}); }
+function remove(id){ showConfirm({title:'Remove Member', message:'Permanently remove from workspace? They will lose all access.', confirmLabel:'Remove', confirmType:'danger', onConfirm:()=>{ showToast('Member removed','error'); }}); }
+
+function switchTab(tab, el){
+  ['active','pending','suspended'].forEach(t=>document.getElementById('tab-'+t).style.display='none');
+  document.getElementById('tab-'+tab).style.display='block';
+  document.querySelectorAll('.tab-item').forEach(i=>i.classList.remove('active'));
+  el.classList.add('active');
+}
+function sendInvite(){
+  const em = document.getElementById('inviteEmail').value;
+  if(em) { closeModal('inviteModal'); showToast(`Invitation sent to ${em}`,'success'); document.getElementById('inviteEmail').value=''; }
+}
+
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function toggleAvatarMenu(){document.getElementById('avatarMenu').classList.toggle('open');}
+document.addEventListener('click',e=>{if(!e.target.closest('#avatarBtn')&&!e.target.closest('#avatarMenu'))document.getElementById('avatarMenu').classList.remove('open');});
+function switchRole(role){ROLE=role;sessionStorage.setItem('role',role);initPage();}
+function updateDevBtns(){['admin','manager','member'].forEach(r=>{document.getElementById('dev'+r.charAt(0).toUpperCase()+r.slice(1)).classList.toggle('active',r===ROLE);});}
+window.showToast=function(msg,type='info'){const c=document.getElementById('toast-container');const t=document.createElement('div');t.className=`toast-pms toast-${type}`;t.innerHTML=`<div class="toast-bar"></div><div class="toast-body">${msg}</div><button class="toast-close" onclick="this.parentElement.remove()">✕</button>`;c.appendChild(t);setTimeout(()=>{t.classList.add('fade-out');setTimeout(()=>t.remove(),200);},3000);};
+window.showConfirm=function({title,message,confirmLabel,confirmType='danger',onConfirm}){document.getElementById('confirmTitle').textContent=title;document.getElementById('confirmMessage').textContent=message;const btn=document.getElementById('confirmBtn');btn.textContent=confirmLabel;btn.className=`btn-${confirmType}`;btn.onclick=()=>{closeModal('confirmModal');if(onConfirm)onConfirm();};document.getElementById('confirmModal').classList.add('open');};
+initPage();
+</script>
+</body>
+</html>

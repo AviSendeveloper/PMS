@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Project Settings — PMS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    .danger-zone { border: 1px solid rgba(248,81,73,0.3); border-radius: var(--radius-md); padding: 20px; background: rgba(248,81,73,0.03); margin-top: 32px; }
+    .danger-item { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; border-bottom: 1px solid rgba(248,81,73,0.1); }
+    .danger-item:last-child { border-bottom: none; padding-bottom: 0; }
+  </style>
+</head>
+<body>
+<!--
+  REACT CONVERSION NOTES:
+  Component: <ProjectSettings /> → /src/pages/ProjectSettings.jsx
+  Role guard: manager-up
+-->
+<nav class="topbar">
+  <a href="dashboard.html" class="topbar-logo">P<span>M</span>S</a>
+  <button class="workspace-switcher"><span>Acme Corp</span><i class="bi bi-chevron-down" style="font-size:11px"></i></button>
+  <div class="topbar-search"><input type="text" class="search-input" placeholder="Search..." readonly /></div>
+  <div class="topbar-actions">
+    <button class="icon-btn"><i class="bi bi-bell"></i></button>
+    <button class="avatar" id="avatarBtn" onclick="toggleAvatarMenu()">AA</button>
+  </div>
+  <div class="dropdown-pms" id="avatarMenu" style="right:8px;top:52px">
+    <a href="profile.html" class="dropdown-item-pms"><i class="bi bi-person"></i>Profile</a>
+    <a href="auth-login.html" class="dropdown-item-pms danger"><i class="bi bi-box-arrow-right"></i>Sign Out</a>
+  </div>
+</nav>
+<aside class="sidebar">
+  <div class="sidebar-section-label">Main</div>
+  <a href="dashboard.html" class="nav-item"><i class="bi bi-grid-1x2"></i>Dashboard</a>
+  <a href="project-list.html" class="nav-item active"><i class="bi bi-folder"></i>Projects</a>
+  <a href="members-workspace.html" class="nav-item admin-only"><i class="bi bi-people"></i>Members</a>
+  <div class="sidebar-bottom">
+    <div class="sidebar-user"><div class="avatar avatar-sm" id="sidebarAvatar">AA</div>
+      <div class="sidebar-user-info"><div class="sidebar-user-name" id="sidebarName">Alex Admin</div>
+        <div class="sidebar-user-role"><span class="role-badge-sm" id="sidebarRole">Admin</span></div></div></div>
+  </div>
+</aside>
+<main class="main-wrapper">
+  <div class="breadcrumb-pms">
+    <a href="project-list.html">Projects</a><span class="sep">/</span>
+    <a href="project-board.html">Engineering Platform</a><span class="sep">/</span>
+    <span class="current">Settings</span>
+  </div>
+  <div class="project-tabs mb-4">
+    <a href="project-board.html" class="project-tab">Board</a>
+    <a href="project-backlog.html" class="project-tab">Backlog</a>
+    <a href="project-sprints.html" class="project-tab">Sprints</a>
+    <a href="reports.html" class="project-tab manager-up">Reports</a>
+    <a href="project-members.html" class="project-tab manager-up">Members</a>
+    <a href="project-settings.html" class="project-tab active manager-up">Settings</a>
+  </div>
+
+  <div id="rbacBlock" style="display:none; text-align:center; padding-top:10vh">
+    <i class="bi bi-shield-lock" style="font-size:64px;color:var(--danger)"></i>
+    <h2 class="mt-3">Access Denied</h2>
+    <p>Only Project Managers can access project settings.</p>
+    <a href="project-board.html" class="btn-primary" style="display:inline-block;margin-top:16px;text-decoration:none">Back to Board</a>
+  </div>
+
+  <div id="pageContent" class="row">
+    <div class="col-md-3">
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <a href="project-settings.html" class="btn-ghost" style="text-align:left;background:var(--bg-elevated);color:var(--text-primary)">General</a>
+        <a href="project-labels.html" class="btn-ghost" style="text-align:left">Labels</a>
+      </div>
+    </div>
+    <div class="col-md-9" style="max-width:600px">
+      <h2 class="mb-4">General Settings</h2>
+      
+      <div class="mb-3"><label>Project Name</label><input type="text" class="fcc" value="Engineering Platform" /></div>
+      <div class="mb-3"><label>Identifier</label><input type="text" class="fcc" value="ENG" disabled style="font-family:var(--font-mono)" /><small style="margin-top:4px;display:block">Identifiers cannot be changed after creation.</small></div>
+      <div class="mb-3"><label>Description</label><textarea class="fcc" rows="3">Core backend services, API gateway, and developer tooling for the platform.</textarea></div>
+      
+      <div class="mb-4"><label>Visibility</label>
+        <div style="display:flex;gap:16px">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;text-transform:none"><input type="radio" name="pVis" value="public" checked /> Public (Workspace)</label>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;text-transform:none"><input type="radio" name="pVis" value="private" /> Private (Members only)</label>
+        </div>
+      </div>
+      
+      <div class="mb-4"><label>Project Type</label>
+        <select class="fcc"><option selected>Software</option><option>Marketing</option><option>Design</option><option>Operations</option></select>
+      </div>
+      
+      <button class="btn-primary" onclick="showToast('Settings saved','success')">Save Changes</button>
+
+      <div class="danger-zone">
+        <h3 style="color:var(--danger);margin-bottom:8px">Danger Zone</h3>
+        <div class="danger-item">
+          <div><div style="font-size:14px;font-weight:600;color:var(--text-primary)">Archive Project</div><div style="font-size:12px;color:var(--text-secondary)">Archived projects are read-only and hidden from default views.</div></div>
+          <button class="btn-secondary" style="color:var(--warning);border-color:var(--warning)" onclick="showConfirm({title:'Archive Project',message:'Archive this project?',confirmLabel:'Archive',confirmType:'warning',onConfirm:()=>showToast('Archived','success')})">Archive Project</button>
+        </div>
+        <div class="danger-item admin-only-flex">
+          <div><div style="font-size:14px;font-weight:600;color:var(--text-primary)">Delete Project</div><div style="font-size:12px;color:var(--text-secondary)">Permanently delete this project and all its issues.</div></div>
+          <button class="btn-danger" onclick="showConfirm({title:'Delete Project',message:'Permanently delete Engineering Platform? This cannot be undone.',confirmLabel:'Delete Project',onConfirm:()=>window.location.href='project-list.html'})">Delete Project</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal-panel" style="max-width:400px">
+    <div class="modal-header"><h3 id="confirmTitle">Confirm</h3><button class="modal-close" onclick="closeModal('confirmModal')">✕</button></div>
+    <p id="confirmMessage"></p>
+    <div class="modal-footer"><button class="btn-secondary" onclick="closeModal('confirmModal')">Cancel</button><button class="btn-danger" id="confirmBtn">Confirm</button></div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<div class="dev-role-switcher">
+  <span class="dev-role-label">Role:</span>
+  <button class="dev-role-btn" id="devAdmin" onclick="switchRole('admin')">Admin</button>
+  <button class="dev-role-btn" id="devManager" onclick="switchRole('manager')">Manager</button>
+  <button class="dev-role-btn" id="devMember" onclick="switchRole('member')">Member</button>
+</div>
+<script>
+let ROLE = sessionStorage.getItem('role')||'admin';
+function initPage(){
+  document.body.setAttribute('data-role',ROLE);
+  const isAuth = ROLE==='admin' || ROLE==='manager';
+  document.getElementById('rbacBlock').style.display = isAuth ? 'none' : 'block';
+  document.getElementById('pageContent').style.display = isAuth ? 'flex' : 'none';
+  if(!isAuth) { updateDevBtns(); return; }
+
+  const initials={admin:'AA',manager:'MM',member:'MX'};
+  document.getElementById('avatarBtn').textContent=initials[ROLE];
+  document.getElementById('sidebarAvatar').textContent=initials[ROLE];
+  document.getElementById('sidebarName').textContent={admin:'Alex Admin',manager:'Morgan Manager',member:'Max Member'}[ROLE];
+  document.getElementById('sidebarRole').textContent=ROLE.charAt(0).toUpperCase()+ROLE.slice(1);
+  updateDevBtns();
+}
+
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function toggleAvatarMenu(){document.getElementById('avatarMenu').classList.toggle('open');}
+document.addEventListener('click',e=>{if(!e.target.closest('#avatarBtn')&&!e.target.closest('#avatarMenu'))document.getElementById('avatarMenu').classList.remove('open');});
+function switchRole(role){ROLE=role;sessionStorage.setItem('role',role);initPage();}
+function updateDevBtns(){['admin','manager','member'].forEach(r=>{document.getElementById('dev'+r.charAt(0).toUpperCase()+r.slice(1)).classList.toggle('active',r===ROLE);});}
+window.showToast=function(msg,type='info'){const c=document.getElementById('toast-container');const t=document.createElement('div');t.className=`toast-pms toast-${type}`;t.innerHTML=`<div class="toast-bar"></div><div class="toast-body">${msg}</div><button class="toast-close" onclick="this.parentElement.remove()">✕</button>`;c.appendChild(t);setTimeout(()=>{t.classList.add('fade-out');setTimeout(()=>t.remove(),200);},3000);};
+window.showConfirm=function({title,message,confirmLabel,confirmType='danger',onConfirm}){document.getElementById('confirmTitle').textContent=title;document.getElementById('confirmMessage').textContent=message;const btn=document.getElementById('confirmBtn');btn.textContent=confirmLabel;btn.className=`btn-${confirmType}`;btn.onclick=()=>{closeModal('confirmModal');if(onConfirm)onConfirm();};document.getElementById('confirmModal').classList.add('open');};
+initPage();
+</script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+.sprint-card{background:var(--bg-surface);border:1px solid var(--bg-border);border-radius:var(--radius-md);padding:20px;margin-bottom:12px;transition:border-color .15s}
+    .sprint-card.active-sprint{border-color:var(--accent)}
+    .sprint-card-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
+    .sprint-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:4px}
+    .sprint-meta span{font-size:12px;color:var(--text-muted)}
+    .sprint-goal{font-size:13px;color:var(--text-secondary);font-style:italic;margin-bottom:12px}
+    .sprint-stats-row{display:flex;gap:20px;margin-top:10px}
+    .sprint-stat{font-size:12px;color:var(--text-muted)}
+    .sprint-stat strong{color:var(--text-primary);font-size:14px;display:block}
+    .closed-toggle{cursor:pointer;font-size:13px;color:var(--text-secondary);display:flex;align-items:center;gap:6px;padding:8px 0;user-select:none}
+    .closed-toggle:hover{color:var(--text-primary)}
+    .closed-section{display:none}
+    .closed-section.open{display:block}

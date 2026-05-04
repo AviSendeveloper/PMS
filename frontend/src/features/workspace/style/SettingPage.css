@@ -1,0 +1,28 @@
+.settings-nav { display:flex; flex-direction:column; gap:2px; }
+    .settings-nav-item {
+      display:flex; align-items:center; gap:10px; padding:9px 12px;
+      border-radius:var(--radius-sm); font-size:14px; color:var(--text-secondary);
+      text-decoration:none; transition:all .12s; border:1px solid transparent;
+    }
+    .settings-nav-item:hover { background:var(--bg-elevated); color:var(--text-primary); }
+    .settings-nav-item.active { background:var(--accent-subtle); color:var(--accent); border-color:rgba(47,129,247,.2); font-weight:500; }
+    .settings-nav-item i { font-size:15px; flex-shrink:0; }
+
+    .settings-section { margin-bottom:24px; }
+    .settings-card { background:var(--bg-surface); border:1px solid var(--bg-border); border-radius:var(--radius-md); overflow:hidden; }
+    .settings-card-header { padding:16px 20px; border-bottom:1px solid var(--bg-border); display:flex; align-items:center; justify-content:space-between; }
+    .settings-card-header h3 { margin:0; font-size:15px; font-weight:600; }
+    .settings-card-body { padding:20px; }
+    .settings-card-footer { padding:14px 20px; border-top:1px solid var(--bg-border); background:var(--bg-base); display:flex; justify-content:flex-end; gap:8px; }
+
+    .danger-zone { background:var(--bg-surface); border:1px solid rgba(248,81,73,.3); border-radius:var(--radius-md); overflow:hidden; }
+    .danger-zone-header { padding:16px 20px; border-bottom:1px solid rgba(248,81,73,.15); }
+    .danger-zone-header h3 { margin:0; font-size:15px; font-weight:600; color:var(--danger); }
+    .danger-row { display:flex; align-items:center; justify-content:space-between; padding:18px 20px; border-bottom:1px solid rgba(248,81,73,.1); gap:16px; }
+    .danger-row:last-child { border-bottom:none; }
+    .danger-row-info h4 { font-size:14px; font-weight:600; color:var(--text-primary); margin:0 0 4px; }
+    .danger-row-info p { font-size:13px; color:var(--text-secondary); margin:0; }
+
+    .url-input-group { display:flex; }
+    .url-prefix { background:var(--bg-base); border:1px solid var(--bg-border); border-right:none; padding:8px 12px; border-radius:var(--radius-sm) 0 0 var(--radius-sm); color:var(--text-muted); font-size:13px; font-family:var(--font-mono); white-space:nowrap; }
+    .url-input { border-radius:0 var(--radius-sm) var(--radius-sm) 0 !important; font-family:var(--font-mono); }

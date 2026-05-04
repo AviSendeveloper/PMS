@@ -1,0 +1,13 @@
+.chart-area{background:var(--bg-elevated);border-radius:var(--radius-sm);padding:12px 0}
+    .burndown-svg{display:block;width:100%;height:220px}
+    .vel-bar-wrap{margin-bottom:8px}
+    .vel-bar-label{font-size:11px;color:var(--text-muted);margin-bottom:3px}
+    .vel-bar-track{background:var(--bg-elevated);border-radius:3px;height:20px;overflow:hidden}
+    .vel-bar-fill{height:100%;background:var(--accent);border-radius:3px;transition:width .4s}
+    .stacked-bar{height:12px;border-radius:6px;overflow:hidden;display:flex;margin-top:6px}
+    .stacked-seg{height:100%;transition:width .4s}
+    .legend-row{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:12px;flex-wrap:wrap}
+    .legend-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+    .sortable-th{cursor:pointer;user-select:none}
+    .sortable-th:hover{color:var(--text-primary)}
+    .sortable-th .bi{font-size:10px;margin-left:3px;color:var(--text-muted)}

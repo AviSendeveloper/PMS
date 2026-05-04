@@ -1,0 +1,22 @@
+.activity-row{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--bg-border)}
+    .activity-row:last-child{border-bottom:none}
+    .activity-text{flex:1;font-size:13px;color:var(--text-secondary);line-height:1.5}
+    .activity-text a{color:var(--accent);text-decoration:none}
+    .activity-text a:hover{text-decoration:underline}
+    .activity-time{font-size:11px;color:var(--text-muted);white-space:nowrap}
+    .activity-name{font-weight:500;color:var(--text-primary)}
+    .invite-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--bg-border)}
+    .invite-row:last-child{border-bottom:none}
+    .invite-email{flex:1;font-size:13px;color:var(--text-secondary)}
+    .sprint-row{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--bg-border)}
+    .sprint-row:last-child{border-bottom:none}
+    .sprint-info{flex:1;min-width:0}
+    .sprint-name{font-size:13px;font-weight:500;color:var(--text-primary)}
+    .sprint-proj{font-size:11px;color:var(--text-muted)}
+    .queue-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bg-border)}
+    .queue-row:last-child{border-bottom:none}
+    .queue-name{font-size:13px;color:var(--text-secondary)}
+    .queue-status{font-size:12px;font-weight:500}
+    .card-section-head{font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+    .card-section-head a{font-size:12px;color:var(--accent);text-decoration:none;font-weight:400}
+    .card-section-head a:hover{text-decoration:underline}

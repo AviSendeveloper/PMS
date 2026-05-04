@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notifications — PMS</title>
+  <meta name="description" content="Your notifications — mentions, assignments, and workspace updates." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    .notif-list { display: flex; flex-direction: column; }
+    .notif-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 16px;
+      border-bottom: 1px solid var(--bg-border);
+      cursor: pointer;
+      transition: background .12s;
+      position: relative;
+    }
+    .notif-item:last-child { border-bottom: none; }
+    .notif-item:hover { background: var(--bg-elevated); }
+    .notif-item.unread { background: rgba(47,129,247,0.04); }
+    .notif-item.unread:hover { background: rgba(47,129,247,0.08); }
+
+    .notif-unread-pip {
+      position: absolute;
+      left: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      opacity: 0;
+      transition: opacity .15s;
+    }
+    .notif-item.unread .notif-unread-pip { opacity: 1; }
+
+    .notif-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .notif-icon.mention  { background: rgba(47,129,247,.14);  color: var(--accent); }
+    .notif-icon.assign   { background: rgba(63,185,80,.14);   color: var(--success); }
+    .notif-icon.status   { background: rgba(163,113,247,.14); color: #a371f7; }
+    .notif-icon.comment  { background: rgba(88,166,255,.14);  color: var(--info); }
+    .notif-icon.system   { background: rgba(139,148,158,.14); color: var(--text-secondary); }
+    .notif-icon.warning  { background: rgba(210,153,34,.14);  color: var(--warning); }
+
+    .notif-body { flex: 1; min-width: 0; }
+    .notif-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+      line-height: 1.4;
+    }
+    .notif-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 6px;
+    }
+    .notif-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .notif-time { font-size: 11px; color: var(--text-muted); }
+    .notif-ident {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--bg-border);
+      color: var(--text-muted);
+      padding: 1px 6px;
+      border-radius: 3px;
+    }
+    .notif-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .filter-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
+    .filter-tabs { display: flex; gap: 4px; }
+    .filter-tab {
+      padding: 6px 14px;
+      border-radius: 100px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 13px;
+      cursor: pointer;
+      font-family: var(--font-body);
+      transition: all .15s;
+    }
+    .filter-tab:hover { background: var(--bg-elevated); color: var(--text-primary); }
+    .filter-tab.active { background: var(--accent-subtle); color: var(--accent); border-color: rgba(47,129,247,.3); font-weight: 500; }
+
+    .notif-day-header {
+      padding: 8px 16px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      background: var(--bg-elevated);
+      border-bottom: 1px solid var(--bg-border);
+    }
+    .notif-empty {
+      text-align: center;
+      padding: 64px 0;
+    }
+    .notif-empty i { font-size: 48px; color: var(--text-muted); }
+    .notif-empty h4 { color: var(--text-secondary); margin: 16px 0 8px; }
+    .notif-empty p { color: var(--text-muted); font-size: 13px; margin: 0; }
+
+    .pref-toggle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--bg-border);
+    }
+    .pref-toggle:last-child { border-bottom: none; }
+    .toggle-switch {
+      position: relative;
+      width: 38px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+    .toggle-switch input { display: none; }
+    .toggle-track {
+      width: 100%;
+      height: 100%;
+      background: var(--bg-border);
+      border-radius: 100px;
+      cursor: pointer;
+      transition: background .2s;
+      display: block;
+    }
+    .toggle-switch input:checked + .toggle-track { background: var(--accent); }
+    .toggle-track::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #fff;
+      transition: transform .2s;
+    }
+    .toggle-switch input:checked + .toggle-track::after { transform: translateX(18px); }
+    .pref-text { flex: 1; }
+    .pref-label { font-size: 13px; color: var(--text-primary); font-weight: 500; }
+    .pref-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  </style>
+</head>
+<body>
+<!--
+  REACT CONVERSION NOTES:
+  Component: <Notifications /> → /src/pages/Notifications.jsx
+  Key state: [notifs, activeFilter, activeTab, unreadCount]
+  API calls: GET /api/notifications, PATCH /api/notifications/:id/read, PATCH /api/notifications/read-all
+  Role guard: All roles
+-->
+<nav class="topbar">
+  <a href="dashboard.html" class="topbar-logo">P<span>M</span>S</a>
+  <button class="workspace-switcher"><span>Acme Corp</span><i class="bi bi-chevron-down" style="font-size:11px"></i></button>
+  <div class="topbar-search">
+    <input type="text" class="search-input" placeholder="Search..." readonly onclick="window.location.href='search.html'" />
+  </div>
+  <div class="topbar-actions">
+    <button class="icon-btn active" title="Notifications" onclick="window.location.href='notifications.html'">
+      <i class="bi bi-bell-fill" style="color:var(--accent)"></i>
+      <span class="notif-badge" id="topbarBadge">3</span>
+    </button>
+    <button class="avatar" id="avatarBtn" onclick="toggleAvatarMenu()">AA</button>
+  </div>
+  <div class="dropdown-pms" id="avatarMenu" style="right:8px;top:52px">
+    <a href="profile.html" class="dropdown-item-pms"><i class="bi bi-person"></i>Profile</a>
+    <a href="api-tokens.html" class="dropdown-item-pms"><i class="bi bi-key"></i>API Tokens</a>
+    <div class="dropdown-sep"></div>
+    <a href="auth-login.html" class="dropdown-item-pms danger"><i class="bi bi-box-arrow-right"></i>Sign Out</a>
+  </div>
+</nav>
+
+<aside class="sidebar">
+  <div class="sidebar-section-label">Main</div>
+  <a href="dashboard.html" class="nav-item"><i class="bi bi-grid-1x2"></i>Dashboard</a>
+  <a href="project-list.html" class="nav-item"><i class="bi bi-folder"></i>Projects</a>
+  <a href="members-workspace.html" class="nav-item admin-only"><i class="bi bi-people"></i>Members</a>
+  <a href="reports.html" class="nav-item manager-up"><i class="bi bi-bar-chart"></i>Reports</a>
+  <a href="search.html" class="nav-item"><i class="bi bi-search"></i>Search</a>
+  <a href="notifications.html" class="nav-item active"><i class="bi bi-bell"></i>Notifications</a>
+  <div class="sidebar-section-label admin-only">Settings</div>
+  <a href="admin-settings.html" class="nav-item admin-only"><i class="bi bi-gear"></i>Workspace</a>
+  <a href="admin-labels.html" class="nav-item admin-only"><i class="bi bi-tags"></i>Labels</a>
+  <a href="admin-webhooks.html" class="nav-item admin-only"><i class="bi bi-link-45deg"></i>Webhooks</a>
+  <a href="api-tokens.html" class="nav-item"><i class="bi bi-key"></i>API Tokens</a>
+  <div class="sidebar-section-label admin-only">System</div>
+  <a href="admin-bull-board.html" class="nav-item admin-only"><i class="bi bi-display"></i>Bull Board</a>
+  <a href="admin-audit-log.html" class="nav-item admin-only"><i class="bi bi-journal-text"></i>Audit Log</a>
+  <div class="sidebar-bottom">
+    <div class="sidebar-user">
+      <div class="avatar avatar-sm" id="sidebarAvatar">AA</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name" id="sidebarName">Alex Admin</div>
+        <div class="sidebar-user-role"><span class="role-badge-sm" id="sidebarRole">Admin</span></div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<main class="main-wrapper">
+  <!-- Page Header -->
+  <div class="d-flex align-items-center justify-content-between mb-1">
+    <div>
+      <h1 class="mb-1">Notifications</h1>
+      <p class="mb-0" style="font-size:13px" id="unreadSummary">You have 3 unread notifications.</p>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="btn-ghost" style="font-size:13px" onclick="openModal('prefModal')"><i class="bi bi-sliders2"></i> Preferences</button>
+      <button class="btn-secondary" style="font-size:13px" onclick="markAllRead()"><i class="bi bi-check2-all"></i> Mark all read</button>
+    </div>
+  </div>
+
+  <!-- Tab row -->
+  <div class="tab-bar" id="notifTabs">
+    <a class="tab-item active" onclick="setTab('inbox', this)">Inbox</a>
+    <a class="tab-item" onclick="setTab('unread', this)">Unread <span id="unreadTabBadge" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--danger);color:#fff;font-size:10px;font-weight:600;margin-left:4px">3</span></a>
+    <a class="tab-item" onclick="setTab('mentions', this)">Mentions</a>
+    <a class="tab-item" onclick="setTab('assigned', this)">Assigned</a>
+  </div>
+
+  <!-- Filter chips -->
+  <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+    <button class="btn-ghost active" id="fAll" onclick="setFilter('all',this)" style="padding:4px 12px;font-size:12px;border:1px solid var(--accent);color:var(--accent);background:var(--accent-subtle);border-radius:100px">All Types</button>
+    <button class="btn-ghost" id="fMention" onclick="setFilter('mention',this)" style="padding:4px 12px;font-size:12px;border:1px solid var(--bg-border);border-radius:100px"><i class="bi bi-at" style="margin-right:4px"></i>Mention</button>
+    <button class="btn-ghost" id="fAssign" onclick="setFilter('assign',this)" style="padding:4px 12px;font-size:12px;border:1px solid var(--bg-border);border-radius:100px"><i class="bi bi-person-plus" style="margin-right:4px"></i>Assignment</button>
+    <button class="btn-ghost" id="fStatus" onclick="setFilter('status',this)" style="padding:4px 12px;font-size:12px;border:1px solid var(--bg-border);border-radius:100px"><i class="bi bi-arrow-left-right" style="margin-right:4px"></i>Status</button>
+    <button class="btn-ghost" id="fSystem" onclick="setFilter('system',this)" style="padding:4px 12px;font-size:12px;border:1px solid var(--bg-border);border-radius:100px"><i class="bi bi-gear" style="margin-right:4px"></i>System</button>
+  </div>
+
+  <!-- Notification List -->
+  <div class="card-pms" style="padding:0;overflow:hidden">
+    <div id="notifContainer"></div>
+  </div>
+</main>
+
+<!-- Preferences Modal -->
+<div class="modal-overlay" id="prefModal">
+  <div class="modal-panel" style="width:480px">
+    <div class="modal-header">
+      <h3>Notification Preferences</h3>
+      <button class="modal-close" onclick="closeModal('prefModal')">✕</button>
+    </div>
+    <div>
+      <div class="pref-toggle">
+        <label class="toggle-switch"><input type="checkbox" checked /><span class="toggle-track"></span></label>
+        <div class="pref-text">
+          <div class="pref-label">@Mentions</div>
+          <div class="pref-sub">Notify me when someone mentions me in a comment.</div>
+        </div>
+      </div>
+      <div class="pref-toggle">
+        <label class="toggle-switch"><input type="checkbox" checked /><span class="toggle-track"></span></label>
+        <div class="pref-text">
+          <div class="pref-label">Issue Assignments</div>
+          <div class="pref-sub">Notify me when an issue is assigned to me.</div>
+        </div>
+      </div>
+      <div class="pref-toggle">
+        <label class="toggle-switch"><input type="checkbox" checked /><span class="toggle-track"></span></label>
+        <div class="pref-text">
+          <div class="pref-label">Status Changes</div>
+          <div class="pref-sub">Notify me when issues I watch change status.</div>
+        </div>
+      </div>
+      <div class="pref-toggle">
+        <label class="toggle-switch"><input type="checkbox" /></label>
+        <div class="pref-text">
+          <div class="pref-label">Email Digest</div>
+          <div class="pref-sub">Receive a daily email summary of your notifications.</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('prefModal')">Cancel</button>
+      <button class="btn-primary" onclick="closeModal('prefModal');showToast('Preferences saved','success')">Save Preferences</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<div class="dev-role-switcher">
+  <span class="dev-role-label">Role:</span>
+  <button class="dev-role-btn" id="devAdmin" onclick="switchRole('admin')">Admin</button>
+  <button class="dev-role-btn" id="devManager" onclick="switchRole('manager')">Manager</button>
+  <button class="dev-role-btn" id="devMember" onclick="switchRole('member')">Member</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+let ROLE = sessionStorage.getItem('role') || 'admin';
+let activeTab = 'inbox';
+let activeFilter = 'all';
+
+let NOTIFS = [
+  { id:1, type:'mention',  icon:'bi-at',             iconClass:'mention', title:'@You in ENG-42', desc:'Sarah Chen mentioned you: "Can you review the OAuth changes @Alex Admin? The redirect seems off on iOS."', ident:'ENG-42', project:'Engineering Platform', time:'10 minutes ago', day:'Today', unread:true, url:'issue-detail.html' },
+  { id:2, type:'assign',   icon:'bi-person-plus',    iconClass:'assign',  title:'Assigned to you', desc:'Tom Singh assigned "API rate limiting implementation" to you.', ident:'ENG-45', project:'Engineering Platform', time:'1 hour ago', day:'Today', unread:true, url:'issue-detail.html' },
+  { id:3, type:'status',   icon:'bi-arrow-left-right',iconClass:'status', title:'Status changed', desc:'Maria Lopez moved "User onboarding flow redesign" from In Progress to In Review.', ident:'ENG-38', project:'Engineering Platform', time:'2 hours ago', day:'Today', unread:true, url:'issue-detail.html' },
+  { id:4, type:'comment',  icon:'bi-chat-dots',      iconClass:'comment', title:'New comment on ENG-29', desc:'Tom Singh commented: "The connection pool is leaking after the migration script runs."', ident:'ENG-29', project:'Engineering Platform', time:'4 hours ago', day:'Today', unread:false, url:'issue-detail.html' },
+  { id:5, type:'system',   icon:'bi-info-circle',    iconClass:'system',  title:'Scheduled maintenance', desc:'Platform maintenance is scheduled for tomorrow at 02:00 AM UTC. Expected downtime: 15 minutes.', ident:'', project:'', time:'6 hours ago', day:'Today', unread:false, url:'' },
+  { id:6, type:'mention',  icon:'bi-at',             iconClass:'mention', title:'@You in ENG-29', desc:'Tom Singh mentioned you: "I think @Alex Admin has more context on this database connection issue from Sprint 4."', ident:'ENG-29', project:'Engineering Platform', time:'Yesterday at 4:30 PM', day:'Yesterday', unread:false, url:'issue-detail.html' },
+  { id:7, type:'assign',   icon:'bi-person-plus',    iconClass:'assign',  title:'Unassigned from issue', desc:'Sarah Chen unassigned you from "Mobile push notification support".', ident:'ENG-49', project:'Engineering Platform', time:'Yesterday at 2:00 PM', day:'Yesterday', unread:false, url:'issue-detail.html' },
+  { id:8, type:'status',   icon:'bi-arrow-left-right',iconClass:'status', title:'Sprint closed', desc:'Sarah Chen closed Sprint 4 and moved 3 unfinished issues to the backlog.', ident:'', project:'Engineering Platform', time:'2 days ago', day:'2 days ago', unread:false, url:'project-sprints.html' },
+];
+
+function initPage() {
+  document.body.setAttribute('data-role', ROLE);
+  const initials = { admin:'AA', manager:'MM', member:'MX' };
+  const names = { admin:'Alex Admin', manager:'Morgan Manager', member:'Max Member' };
+  document.getElementById('avatarBtn').textContent = initials[ROLE];
+  document.getElementById('sidebarAvatar').textContent = initials[ROLE];
+  document.getElementById('sidebarName').textContent = names[ROLE];
+  document.getElementById('sidebarRole').textContent = ROLE.charAt(0).toUpperCase() + ROLE.slice(1);
+  updateDevBtns();
+  renderNotifs();
+  updateBadges();
+}
+
+function getFiltered() {
+  let list = NOTIFS;
+  if (activeTab === 'unread') list = list.filter(n => n.unread);
+  if (activeTab === 'mentions') list = list.filter(n => n.type === 'mention');
+  if (activeTab === 'assigned') list = list.filter(n => n.type === 'assign');
+  if (activeFilter !== 'all') list = list.filter(n => n.type === activeFilter);
+  return list;
+}
+
+function renderNotifs() {
+  const list = getFiltered();
+  const container = document.getElementById('notifContainer');
+
+  if (!list.length) {
+    container.innerHTML = `<div class="notif-empty">
+      <i class="bi bi-bell-slash"></i>
+      <h4>All caught up!</h4>
+      <p>No notifications match your current filter.</p>
+    </div>`;
+    return;
+  }
+
+  // Group by day
+  const days = {};
+  list.forEach(n => { if (!days[n.day]) days[n.day] = []; days[n.day].push(n); });
+
+  container.innerHTML = Object.entries(days).map(([day, items]) => `
+    <div class="notif-day-header">${day}</div>
+    ${items.map(n => `
+      <div class="notif-item ${n.unread ? 'unread' : ''}" id="ni-${n.id}" onclick="readItem(${n.id},'${n.url}')">
+        <div class="notif-unread-pip"></div>
+        <div class="notif-icon ${n.iconClass}"><i class="bi ${n.icon}"></i></div>
+        <div class="notif-body">
+          <div class="notif-title">${n.title}</div>
+          <div class="notif-desc">${n.desc}</div>
+          <div class="notif-meta">
+            <span class="notif-time">${n.time}</span>
+            ${n.ident ? `<span class="notif-ident">${n.ident}</span>` : ''}
+            ${n.project ? `<span style="font-size:11px;color:var(--text-muted)">${n.project}</span>` : ''}
+          </div>
+        </div>
+        <div class="notif-actions">
+          ${n.unread ? `<button class="btn-ghost" style="padding:4px 8px;font-size:12px;white-space:nowrap" onclick="event.stopPropagation();markRead(${n.id})"><i class="bi bi-check2"></i> Mark read</button>` : ''}
+        </div>
+      </div>`).join('')}
+  `).join('');
+}
+
+function readItem(id, url) {
+  markRead(id);
+  if (url) window.location.href = url;
+}
+
+function markRead(id) {
+  const n = NOTIFS.find(x => x.id === id);
+  if (n) n.unread = false;
+  renderNotifs(); updateBadges();
+}
+
+function markAllRead() {
+  NOTIFS.forEach(n => n.unread = false);
+  renderNotifs(); updateBadges();
+  showToast('All notifications marked as read', 'success');
+}
+
+function updateBadges() {
+  const count = NOTIFS.filter(n => n.unread).length;
+  const badge = document.getElementById('topbarBadge');
+  const tabBadge = document.getElementById('unreadTabBadge');
+  badge.textContent = count;
+  badge.style.display = count > 0 ? 'flex' : 'none';
+  tabBadge.textContent = count;
+  tabBadge.style.display = count > 0 ? 'inline-flex' : 'none';
+  document.getElementById('unreadSummary').textContent = count > 0
+    ? `You have ${count} unread notification${count > 1 ? 's' : ''}.`
+    : 'You\'re all caught up!';
+}
+
+function setTab(tab, el) {
+  activeTab = tab;
+  document.querySelectorAll('#notifTabs .tab-item').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderNotifs();
+}
+
+function setFilter(f, el) {
+  activeFilter = f;
+  document.querySelectorAll('[id^="f"]').forEach(btn => {
+    btn.style.borderColor = 'var(--bg-border)';
+    btn.style.color = 'var(--text-secondary)';
+    btn.style.background = 'transparent';
+  });
+  el.style.borderColor = 'rgba(47,129,247,.4)';
+  el.style.color = 'var(--accent)';
+  el.style.background = 'var(--accent-subtle)';
+  renderNotifs();
+}
+
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function toggleAvatarMenu() { document.getElementById('avatarMenu').classList.toggle('open'); }
+document.addEventListener('click', e => {
+  if (!e.target.closest('#avatarBtn') && !e.target.closest('#avatarMenu')) document.getElementById('avatarMenu').classList.remove('open');
+});
+function switchRole(role) { ROLE = role; sessionStorage.setItem('role', role); initPage(); }
+function updateDevBtns() { ['admin','manager','member'].forEach(r => { document.getElementById('dev'+r.charAt(0).toUpperCase()+r.slice(1)).classList.toggle('active', r===ROLE); }); }
+window.showToast = function(msg, type='info') { const c=document.getElementById('toast-container'); const t=document.createElement('div'); t.className=`toast-pms toast-${type}`; t.innerHTML=`<div class="toast-bar"></div><div class="toast-body">${msg}</div><button class="toast-close" onclick="this.parentElement.remove()">✕</button>`; c.appendChild(t); setTimeout(()=>{ t.classList.add('fade-out'); setTimeout(()=>t.remove(),200); }, 3000); };
+
+initPage();
+</script>
+</body>
+</html>

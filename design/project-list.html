@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Projects — PMS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    .proj-card{background:var(--bg-surface);border:1px solid var(--bg-border);border-radius:var(--radius-md);padding:16px;height:100%;transition:border-color .15s;position:relative}
+    .proj-card:hover{border-color:var(--accent)}
+    .proj-card-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
+    .proj-ident{font-size:11px;font-weight:600;font-family:var(--font-mono);background:var(--accent-subtle);color:var(--accent);padding:2px 8px;border-radius:var(--radius-sm)}
+    .proj-name{font-size:16px;font-weight:600;color:var(--text-primary);margin:8px 0 4px}
+    .proj-desc{font-size:13px;color:var(--text-secondary);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:12px;min-height:38px}
+    .proj-stats{font-size:12px;color:var(--text-muted);margin-top:8px}
+    .proj-footer{font-size:11px;color:var(--text-muted);margin-top:8px;padding-top:8px;border-top:1px solid var(--bg-border);display:flex;align-items:center;justify-content:space-between}
+    .vis-badge{font-size:11px;border-radius:100px;padding:1px 8px;font-weight:500}
+    .vis-public{background:rgba(63,185,80,.12);color:var(--success)}
+    .vis-private{background:rgba(72,79,88,.15);color:var(--text-muted)}
+    .three-dot{background:none;border:none;color:var(--text-muted);cursor:pointer;padding:2px 6px;border-radius:var(--radius-sm);font-size:16px;line-height:1}
+    .three-dot:hover{background:var(--bg-elevated);color:var(--text-primary)}
+    .proj-card-menu{position:absolute;top:40px;right:12px;z-index:100}
+    .filter-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .filter-select{background:var(--bg-elevated);border:1px solid var(--bg-border);border-radius:var(--radius-sm);color:var(--text-primary);padding:6px 28px 6px 10px;font-size:13px;font-family:var(--font-body);outline:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 16 16'%3E%3Cpath fill='%238b949e' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center}
+    .filter-select:focus{border-color:var(--accent)}
+    .type-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:4px}
+    .type-opt{background:var(--bg-elevated);border:1px solid var(--bg-border);border-radius:var(--radius-sm);padding:10px 8px;text-align:center;cursor:pointer;transition:all .15s}
+    .type-opt:hover,.type-opt.selected{background:var(--accent-subtle);border-color:var(--accent);color:var(--accent)}
+    .type-opt i{display:block;font-size:20px;margin-bottom:4px}
+    .type-opt span{font-size:11px}
+  </style>
+</head>
+<body>
+<!--
+  REACT CONVERSION NOTES:
+  Component: <ProjectList /> → /src/pages/ProjectList.jsx
+  Key state: [projects, filterStatus, sortBy, showArchived, createModal]
+  API calls: GET /api/projects, POST /api/projects, PATCH /api/projects/:id/archive, DELETE /api/projects/:id
+  Child components: <ProjectCard />, <CreateProjectModal />, <Topbar />, <Sidebar />
+  Role guard: All roles — manager-up for create/edit/delete
+-->
+<nav class="topbar">
+  <a href="dashboard.html" class="topbar-logo">P<span>M</span>S</a>
+  <button class="workspace-switcher"><span id="wsName">Acme Corp</span><i class="bi bi-chevron-down" style="font-size:11px"></i></button>
+  <div class="topbar-search"><input type="text" class="search-input" placeholder="Search issues, projects..." onclick="window.location.href='search.html'" readonly /></div>
+  <div class="topbar-actions">
+    <button class="icon-btn" onclick="window.location.href='notifications.html'" title="Notifications"><i class="bi bi-bell"></i><span class="notif-badge">3</span></button>
+    <button class="avatar" id="avatarBtn" onclick="toggleAvatarMenu()">AA</button>
+  </div>
+  <div class="dropdown-pms" id="avatarMenu" style="right:8px;top:52px">
+    <a href="profile.html" class="dropdown-item-pms"><i class="bi bi-person"></i>Profile</a>
+    <a href="api-tokens.html" class="dropdown-item-pms"><i class="bi bi-key"></i>API Tokens</a>
+    <div class="dropdown-sep"></div>
+    <a href="auth-login.html" class="dropdown-item-pms danger"><i class="bi bi-box-arrow-right"></i>Sign Out</a>
+  </div>
+</nav>
+<aside class="sidebar">
+  <div class="sidebar-section-label">Main</div>
+  <a href="dashboard.html" class="nav-item"><i class="bi bi-grid-1x2"></i>Dashboard</a>
+  <a href="project-list.html" class="nav-item active"><i class="bi bi-folder"></i>Projects</a>
+  <a href="members-workspace.html" class="nav-item admin-only"><i class="bi bi-people"></i>Members</a>
+  <a href="reports.html" class="nav-item manager-up"><i class="bi bi-bar-chart"></i>Reports</a>
+  <a href="search.html" class="nav-item"><i class="bi bi-search"></i>Search</a>
+  <a href="notifications.html" class="nav-item"><i class="bi bi-bell"></i>Notifications</a>
+  <div class="sidebar-section-label admin-only">Settings</div>
+  <a href="admin-settings.html" class="nav-item admin-only"><i class="bi bi-gear"></i>Workspace</a>
+  <a href="admin-labels.html" class="nav-item admin-only"><i class="bi bi-tags"></i>Labels</a>
+  <a href="admin-webhooks.html" class="nav-item admin-only"><i class="bi bi-link-45deg"></i>Webhooks</a>
+  <a href="api-tokens.html" class="nav-item"><i class="bi bi-key"></i>API Tokens</a>
+  <div class="sidebar-section-label admin-only">System</div>
+  <a href="admin-bull-board.html" class="nav-item admin-only"><i class="bi bi-display"></i>Bull Board</a>
+  <a href="admin-audit-log.html" class="nav-item admin-only"><i class="bi bi-journal-text"></i>Audit Log</a>
+  <div class="sidebar-bottom">
+    <div class="sidebar-user"><div class="avatar avatar-sm" id="sidebarAvatar">AA</div>
+      <div class="sidebar-user-info"><div class="sidebar-user-name" id="sidebarName">Alex Admin</div>
+        <div class="sidebar-user-role"><span class="role-badge-sm" id="sidebarRole">Admin</span></div></div></div>
+  </div>
+</aside>
+<main class="main-wrapper">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h1 class="mb-0">Projects</h1>
+    <button class="btn-primary manager-up" onclick="openModal('createProjectModal')"><i class="bi bi-plus"></i> New Project</button>
+  </div>
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div class="filter-bar">
+      <select class="filter-select" id="filterStatus" onchange="renderProjects()">
+        <option value="all">All Status</option>
+        <option value="active">Active</option>
+        <option value="archived">Archived</option>
+      </select>
+      <select class="filter-select" id="sortBy" onchange="renderProjects()">
+        <option value="name">Sort: Name</option>
+        <option value="created">Sort: Created</option>
+        <option value="updated">Sort: Updated</option>
+      </select>
+      <label class="admin-only" style="display:flex;align-items:center;gap:6px;cursor:pointer;text-transform:none;letter-spacing:0;font-size:13px;color:var(--text-secondary);margin-bottom:0">
+        <input type="checkbox" id="showArchived" onchange="renderProjects()" /> Show Archived
+      </label>
+    </div>
+    <div style="font-size:13px;color:var(--text-muted)" id="projCount"></div>
+  </div>
+  <div class="row g-3" id="projectGrid"></div>
+</main>
+
+<!-- Create Project Modal -->
+<div class="modal-overlay" id="createProjectModal">
+  <div class="modal-panel" style="width:520px">
+    <div class="modal-header"><h3>New Project</h3><button class="modal-close" onclick="closeModal('createProjectModal')">✕</button></div>
+    <div class="mb-3"><label for="projName">Project Name</label><input type="text" id="projName" class="fcc" placeholder="e.g. Mobile App" oninput="autoIdent()" /></div>
+    <div class="mb-3"><label for="projIdent">Identifier</label><input type="text" id="projIdent" class="fcc" placeholder="ENG" maxlength="5" style="font-family:var(--font-mono);text-transform:uppercase" /></div>
+    <div class="mb-3"><label for="projDesc">Description</label><textarea id="projDesc" class="fcc" rows="2" placeholder="What is this project about?"></textarea></div>
+    <div class="mb-3"><label>Visibility</label>
+      <div class="d-flex gap-3 mt-1">
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;text-transform:none;letter-spacing:0"><input type="radio" name="projVis" value="public" checked /> Public</label>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;text-transform:none;letter-spacing:0"><input type="radio" name="projVis" value="private" /> Private</label>
+      </div></div>
+    <div class="mb-3"><label>Type</label>
+      <div class="type-grid" id="typeGrid">
+        <div class="type-opt selected" onclick="selectType(this,'Software')"><i class="bi bi-code-slash"></i><span>Software</span></div>
+        <div class="type-opt" onclick="selectType(this,'Marketing')"><i class="bi bi-megaphone"></i><span>Marketing</span></div>
+        <div class="type-opt" onclick="selectType(this,'Design')"><i class="bi bi-palette"></i><span>Design</span></div>
+        <div class="type-opt" onclick="selectType(this,'Operations')"><i class="bi bi-gear"></i><span>Operations</span></div>
+      </div></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('createProjectModal')">Cancel</button>
+      <button class="btn-primary" onclick="createProject()">Create Project</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Modal -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal-panel" style="max-width:400px">
+    <div class="modal-header"><h3 id="confirmTitle">Confirm</h3><button class="modal-close" onclick="closeModal('confirmModal')">✕</button></div>
+    <p id="confirmMessage"></p>
+    <div class="modal-footer"><button class="btn-secondary" onclick="closeModal('confirmModal')">Cancel</button><button class="btn-danger" id="confirmBtn">Delete</button></div>
+  </div>
+</div>
+<div id="toast-container"></div>
+<!-- DEV ONLY -->
+<div class="dev-role-switcher">
+  <span class="dev-role-label">Role:</span>
+  <button class="dev-role-btn" id="devAdmin" onclick="switchRole('admin')">Admin</button>
+  <button class="dev-role-btn" id="devManager" onclick="switchRole('manager')">Manager</button>
+  <button class="dev-role-btn" id="devMember" onclick="switchRole('member')">Member</button>
+</div>
+<!-- END DEV ONLY -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const MOCK_PROJECTS = [
+  {id:1,ident:'ENG',name:'Engineering Platform',desc:'Core backend services, API gateway, and developer tooling for the platform.',visibility:'public',type:'Software',progress:67,members:['SC','AA','ML','TS','RK'],issues:48,open:16,overdue:3,updated:'2h ago',archived:false},
+  {id:2,ident:'MKT',name:'Marketing Site v3',desc:'Complete redesign of the marketing website with new brand guidelines.',visibility:'public',type:'Marketing',progress:34,members:['AA','JD'],issues:22,open:14,overdue:2,updated:'4h ago',archived:false},
+  {id:3,ident:'MOB',name:'Mobile App v2',desc:'iOS and Android application with offline-first architecture.',visibility:'private',type:'Software',progress:12,members:['ML','TS','SC'],issues:65,open:54,overdue:8,updated:'1d ago',archived:false},
+  {id:4,ident:'DSN',name:'Design System',desc:'Component library and design tokens for consistent UI across products.',visibility:'public',type:'Design',progress:89,members:['JD','AA'],issues:31,open:3,overdue:0,updated:'3d ago',archived:false},
+  {id:5,ident:'OPS',name:'DevOps & Infrastructure',desc:'CI/CD pipelines, Kubernetes clusters, and monitoring setup.',visibility:'private',type:'Operations',progress:55,members:['TS','RK','AA'],issues:19,open:8,overdue:1,updated:'5d ago',archived:false},
+  {id:6,ident:'LEG',name:'Legacy API',desc:'Maintenance of the legacy REST API before full migration.',visibility:'private',type:'Software',progress:100,members:['RK'],issues:12,open:0,overdue:0,updated:'2w ago',archived:true},
+];
+let ROLE = sessionStorage.getItem('role')||'admin';
+let projects = [...MOCK_PROJECTS];
+let selectedType = 'Software';
+
+function initPage(){
+  document.body.setAttribute('data-role',ROLE);
+  const initials={admin:'AA',manager:'MM',member:'MX'};
+  document.getElementById('avatarBtn').textContent=initials[ROLE]||'AA';
+  document.getElementById('sidebarAvatar').textContent=initials[ROLE]||'AA';
+  const names={admin:'Alex Admin',manager:'Morgan Manager',member:'Max Member'};
+  document.getElementById('sidebarName').textContent=names[ROLE]||'User';
+  document.getElementById('sidebarRole').textContent=ROLE.charAt(0).toUpperCase()+ROLE.slice(1);
+  updateDevBtns();
+  renderProjects();
+}
+
+function renderProjects(){
+  const status=document.getElementById('filterStatus').value;
+  const sort=document.getElementById('sortBy').value;
+  const showArc=document.getElementById('showArchived')?.checked;
+  let list=projects.filter(p=>{
+    if(p.archived&&!showArc&&ROLE!=='admin') return false;
+    if(p.archived&&!showArc&&!document.getElementById('showArchived')?.checked) return false;
+    if(status==='active'&&p.archived) return false;
+    if(status==='archived'&&!p.archived) return false;
+    if(ROLE==='member'&&p.visibility==='private') return false;
+    return true;
+  });
+  if(sort==='name') list.sort((a,b)=>a.name.localeCompare(b.name));
+  document.getElementById('projCount').textContent=`${list.length} project${list.length!==1?'s':''}`;
+  const grid=document.getElementById('projectGrid');
+  if(list.length===0){
+    grid.innerHTML=`<div class="col-12"><div class="empty-state"><i class="bi bi-folder2-open"></i><h4>No projects</h4><p>Create your first project to get started.</p></div></div>`;
+    return;
+  }
+  grid.innerHTML=list.map(p=>`
+    <div class="col-md-6 col-xl-4">
+      <div class="proj-card" id="proj-${p.id}">
+        <div class="proj-card-head">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="proj-ident">${p.ident}</span>
+            <span class="vis-badge ${p.visibility==='public'?'vis-public':'vis-private'}">${p.visibility==='public'?'Public':'Private'}</span>
+            ${p.archived?'<span class="status-badge status-cancelled">Archived</span>':''}
+          </div>
+          <div style="position:relative">
+            <button class="three-dot" onclick="toggleProjMenu(event,${p.id})">···</button>
+            <div class="dropdown-pms proj-card-menu" id="menu-${p.id}">
+              <a href="project-board.html" class="dropdown-item-pms"><i class="bi bi-kanban"></i>View Board</a>
+              <a href="project-backlog.html" class="dropdown-item-pms"><i class="bi bi-list-task"></i>Backlog</a>
+              ${ROLE!=='member'?`<a href="project-settings.html" class="dropdown-item-pms manager-up"><i class="bi bi-gear"></i>Settings</a><div class="dropdown-sep manager-up"></div><div class="dropdown-item-pms manager-up" onclick="archiveProject(${p.id})"><i class="bi bi-archive"></i>Archive</div>`:''}
+              ${ROLE==='admin'?`<div class="dropdown-item-pms danger admin-only" onclick="deleteProject(${p.id})"><i class="bi bi-trash"></i>Delete</div>`:''}
+            </div>
+          </div>
+        </div>
+        <div class="proj-name">${p.name}</div>
+        <div class="proj-desc">${p.desc}</div>
+        <div style="margin-bottom:10px">
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-bottom:4px">
+            <span>Progress</span><span>${p.progress}%</span>
+          </div>
+          <div class="progress-pms"><div class="progress-fill${p.progress===100?' success':''}" style="width:${p.progress}%"></div></div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div class="avatar-stack">${p.members.slice(0,5).reverse().map(m=>`<div class="avatar avatar-sm" title="${m}">${m}</div>`).join('')}${p.members.length>5?`<div class="avatar avatar-sm" style="background:var(--bg-border);color:var(--text-muted)">+${p.members.length-5}</div>`:''}</div>
+          <div class="proj-stats">${p.issues} issues · ${p.open} open${p.overdue>0?` · <span style="color:var(--danger)">${p.overdue} overdue</span>`:''}</div>
+        </div>
+        <div class="proj-footer"><span>Updated ${p.updated}</span><a href="project-board.html" class="btn-ghost" style="padding:3px 8px;font-size:12px">View Board →</a></div>
+      </div>
+    </div>`).join('');
+}
+
+function toggleProjMenu(e,id){
+  e.stopPropagation();
+  document.querySelectorAll('.proj-card-menu').forEach(m=>{ if(m.id!==`menu-${id}`) m.classList.remove('open'); });
+  document.getElementById(`menu-${id}`).classList.toggle('open');
+}
+document.addEventListener('click',()=>document.querySelectorAll('.proj-card-menu').forEach(m=>m.classList.remove('open')));
+
+function autoIdent(){
+  const name=document.getElementById('projName').value;
+  const ident=name.trim().split(/\s+/).map(w=>w[0]||'').join('').toUpperCase().slice(0,5)||name.slice(0,3).toUpperCase();
+  document.getElementById('projIdent').value=ident;
+}
+function selectType(el,type){
+  document.querySelectorAll('.type-opt').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');selectedType=type;
+}
+function createProject(){
+  const name=document.getElementById('projName').value.trim();
+  const ident=document.getElementById('projIdent').value.trim().toUpperCase();
+  if(!name||!ident){showToast('Project name and identifier are required','error');return;}
+  const vis=document.querySelector('input[name="projVis"]:checked').value;
+  const newProj={id:Date.now(),ident,name,desc:document.getElementById('projDesc').value||'No description.',visibility:vis,type:selectedType,progress:0,members:['AA'],issues:0,open:0,overdue:0,updated:'just now',archived:false};
+  projects.unshift(newProj);
+  closeModal('createProjectModal');
+  document.getElementById('projName').value='';document.getElementById('projIdent').value='';document.getElementById('projDesc').value='';
+  renderProjects();
+  showToast(`Project "${name}" created!`,'success');
+}
+function archiveProject(id){
+  showConfirm({title:'Archive Project',message:'Archive this project? It will be hidden from active views.',confirmLabel:'Archive',confirmType:'secondary',onConfirm:()=>{
+    const p=projects.find(p=>p.id===id);if(p){p.archived=true;p.updated='just now';}
+    renderProjects();showToast('Project archived','warning');
+  }});
+}
+function deleteProject(id){
+  showConfirm({title:'Delete Project',message:'This will permanently delete the project and all its issues. This cannot be undone.',confirmLabel:'Delete',confirmType:'danger',onConfirm:()=>{
+    projects=projects.filter(p=>p.id!==id);renderProjects();showToast('Project deleted','error');
+  }});
+}
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function toggleAvatarMenu(){document.getElementById('avatarMenu').classList.toggle('open');}
+document.addEventListener('click',e=>{if(!e.target.closest('#avatarBtn')&&!e.target.closest('#avatarMenu'))document.getElementById('avatarMenu').classList.remove('open');});
+function switchRole(role){ROLE=role;sessionStorage.setItem('role',role);initPage();}
+function updateDevBtns(){['admin','manager','member'].forEach(r=>{document.getElementById('dev'+r.charAt(0).toUpperCase()+r.slice(1)).classList.toggle('active',r===ROLE);});}
+window.showToast=function(msg,type='info'){const c=document.getElementById('toast-container');const t=document.createElement('div');t.className=`toast-pms toast-${type}`;t.innerHTML=`<div class="toast-bar"></div><div class="toast-body">${msg}</div><button class="toast-close" onclick="this.parentElement.remove()">✕</button>`;c.appendChild(t);setTimeout(()=>{t.classList.add('fade-out');setTimeout(()=>t.remove(),200);},3000);};
+window.showConfirm=function({title,message,confirmLabel='Confirm',confirmType='danger',onConfirm}){document.getElementById('confirmTitle').textContent=title;document.getElementById('confirmMessage').textContent=message;const btn=document.getElementById('confirmBtn');btn.textContent=confirmLabel;btn.className=`btn-${confirmType}`;btn.onclick=()=>{closeModal('confirmModal');if(onConfirm)onConfirm();};document.getElementById('confirmModal').classList.add('open');};
+initPage();
+</script>
+</body>
+</html>

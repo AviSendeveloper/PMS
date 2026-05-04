@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — PMS</title>
+  <meta name="description" content="PMS Dashboard — workspace overview, activity feed, active sprints and job queue status." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    .activity-row{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--bg-border)}
+    .activity-row:last-child{border-bottom:none}
+    .activity-text{flex:1;font-size:13px;color:var(--text-secondary);line-height:1.5}
+    .activity-text a{color:var(--accent);text-decoration:none}
+    .activity-text a:hover{text-decoration:underline}
+    .activity-time{font-size:11px;color:var(--text-muted);white-space:nowrap}
+    .activity-name{font-weight:500;color:var(--text-primary)}
+    .invite-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--bg-border)}
+    .invite-row:last-child{border-bottom:none}
+    .invite-email{flex:1;font-size:13px;color:var(--text-secondary)}
+    .sprint-row{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--bg-border)}
+    .sprint-row:last-child{border-bottom:none}
+    .sprint-info{flex:1;min-width:0}
+    .sprint-name{font-size:13px;font-weight:500;color:var(--text-primary)}
+    .sprint-proj{font-size:11px;color:var(--text-muted)}
+    .queue-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bg-border)}
+    .queue-row:last-child{border-bottom:none}
+    .queue-name{font-size:13px;color:var(--text-secondary)}
+    .queue-status{font-size:12px;font-weight:500}
+    .card-section-head{font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+    .card-section-head a{font-size:12px;color:var(--accent);text-decoration:none;font-weight:400}
+    .card-section-head a:hover{text-decoration:underline}
+  </style>
+</head>
+<body>
+<!--
+  REACT CONVERSION NOTES:
+  Component: <Dashboard /> → /src/pages/Dashboard.jsx
+  Key state: [role, activities, pendingInvites, activeSprints, queueStatus, kpiData]
+  API calls: GET /api/dashboard/stats, GET /api/dashboard/activity, GET /api/invites, GET /api/sprints/active
+  Child components: <KPICard />, <ActivityFeed />, <PendingInvitations />, <ActiveSprints />, <JobQueueStatus />
+  Role guard: All roles — data filtered server-side and by JS role context
+-->
+
+<!-- COMPONENT: Topbar -->
+<nav class="topbar">
+  <a href="dashboard.html" class="topbar-logo">P<span>M</span>S</a>
+  <button class="workspace-switcher" id="wsSwitcher">
+    <span id="wsName">Acme Corp</span><i class="bi bi-chevron-down" style="font-size:11px"></i>
+  </button>
+  <div class="topbar-search">
+    <input type="text" class="search-input" placeholder="Search issues, projects..." onclick="window.location.href='search.html'" readonly />
+  </div>
+  <div class="topbar-actions">
+    <button class="icon-btn" id="notifBtn" title="Notifications" onclick="toggleNotifDropdown()">
+      <i class="bi bi-bell"></i>
+      <span class="notif-badge" id="notifBadge">3</span>
+    </button>
+    <button class="avatar" id="avatarBtn" onclick="toggleAvatarMenu()" title="Account">AA</button>
+  </div>
+  <!-- Notification Dropdown -->
+  <div class="dropdown-pms" id="notifDropdown" style="right:48px;top:52px;width:320px">
+    <div style="padding:10px 12px;font-size:12px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--bg-border)">Notifications</div>
+    <div id="notifList"></div>
+    <div style="padding:8px 12px;border-top:1px solid var(--bg-border);text-align:center">
+      <a href="notifications.html" style="font-size:12px;color:var(--accent);text-decoration:none">View All Notifications</a>
+    </div>
+  </div>
+  <!-- Avatar Dropdown -->
+  <div class="dropdown-pms" id="avatarMenu" style="right:8px;top:52px;">
+    <a href="profile.html" class="dropdown-item-pms"><i class="bi bi-person"></i>Profile</a>
+    <a href="api-tokens.html" class="dropdown-item-pms"><i class="bi bi-key"></i>API Tokens</a>
+    <div class="dropdown-sep"></div>
+    <a href="auth-login.html" class="dropdown-item-pms danger"><i class="bi bi-box-arrow-right"></i>Sign Out</a>
+  </div>
+</nav>
+
+<!-- COMPONENT: Sidebar -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-section-label">Main</div>
+  <a href="dashboard.html" class="nav-item active" id="nav-dashboard"><i class="bi bi-grid-1x2"></i>Dashboard</a>
+  <a href="project-list.html" class="nav-item" id="nav-projects"><i class="bi bi-folder"></i>Projects</a>
+  <a href="members-workspace.html" class="nav-item admin-only" id="nav-members"><i class="bi bi-people"></i>Members</a>
+  <a href="reports.html" class="nav-item manager-up" id="nav-reports"><i class="bi bi-bar-chart"></i>Reports</a>
+  <a href="search.html" class="nav-item" id="nav-search"><i class="bi bi-search"></i>Search</a>
+  <a href="notifications.html" class="nav-item" id="nav-notifs"><i class="bi bi-bell"></i>Notifications</a>
+  <div class="sidebar-section-label admin-only">Settings</div>
+  <a href="admin-settings.html" class="nav-item admin-only" id="nav-workspace"><i class="bi bi-gear"></i>Workspace</a>
+  <a href="admin-labels.html" class="nav-item admin-only" id="nav-labels"><i class="bi bi-tags"></i>Labels</a>
+  <a href="admin-webhooks.html" class="nav-item admin-only" id="nav-webhooks"><i class="bi bi-link-45deg"></i>Webhooks</a>
+  <a href="api-tokens.html" class="nav-item" id="nav-api-tokens"><i class="bi bi-key"></i>API Tokens</a>
+  <div class="sidebar-section-label admin-only">System</div>
+  <a href="admin-bull-board.html" class="nav-item admin-only" id="nav-bull"><i class="bi bi-display"></i>Bull Board</a>
+  <a href="admin-audit-log.html" class="nav-item admin-only" id="nav-audit"><i class="bi bi-journal-text"></i>Audit Log</a>
+  <div class="sidebar-bottom">
+    <div class="sidebar-user">
+      <div class="avatar avatar-sm" id="sidebarAvatar">AA</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name" id="sidebarName">Alex Admin</div>
+        <div class="sidebar-user-role"><span class="role-badge-sm" id="sidebarRole">Admin</span></div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<main class="main-wrapper">
+  <!-- Page Header -->
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h1 class="mb-1" id="dashTitle">Dashboard</h1>
+      <p class="mb-0" style="font-size:13px" id="dashSubtitle">Welcome back, Alex. Here's what's happening.</p>
+    </div>
+    <button class="btn-primary manager-up" onclick="showToast('Invite sent!','success')"><i class="bi bi-plus"></i> Invite Member</button>
+  </div>
+
+  <!-- KPI Row -->
+  <div class="row g-3 mb-4" id="kpiRow"></div>
+
+  <!-- Main 2-col -->
+  <div class="row g-3">
+    <!-- Activity Feed -->
+    <div class="col-lg-8">
+      <div class="card-pms">
+        <div class="card-section-head">
+          <span>Recent Activity</span>
+          <a href="#">View all</a>
+        </div>
+        <div id="activityFeed"></div>
+      </div>
+    </div>
+    <!-- Right col -->
+    <div class="col-lg-4">
+      <!-- Pending Invitations (admin-only) -->
+      <div class="card-pms mb-3 admin-only" id="pendingCard">
+        <div class="card-section-head">
+          <span>Pending Invitations</span>
+          <a href="members-workspace.html">Manage</a>
+        </div>
+        <div id="pendingList"></div>
+        <button class="btn-ghost" style="padding:6px 0;font-size:13px;margin-top:8px" onclick="openInviteModal()">
+          <i class="bi bi-plus"></i> Invite Member
+        </button>
+      </div>
+      <!-- Active Sprints -->
+      <div class="card-pms mb-3">
+        <div class="card-section-head">
+          <span>Active Sprints</span>
+          <a href="project-sprints.html">View all</a>
+        </div>
+        <div id="sprintList"></div>
+      </div>
+      <!-- Job Queue Status (admin-only) -->
+      <div class="card-pms admin-only" id="queueCard">
+        <div class="card-section-head">
+          <span>Job Queue Status</span>
+          <a href="admin-bull-board.html">View All</a>
+        </div>
+        <div id="queueStatus"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Invite Member Modal -->
+<div class="modal-overlay" id="inviteModal">
+  <div class="modal-panel">
+    <div class="modal-header">
+      <h3>Invite Member</h3>
+      <button class="modal-close" onclick="closeModal('inviteModal')">✕</button>
+    </div>
+    <div class="form-group mb-3">
+      <label for="inviteEmail">Email Address</label>
+      <input type="email" id="inviteEmail" class="fcc" placeholder="colleague@company.com" />
+    </div>
+    <div class="mb-3">
+      <label>Role</label>
+      <div class="d-flex gap-2 mt-1">
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;text-transform:none;letter-spacing:0"><input type="radio" name="invRole" value="admin" /> Admin</label>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;text-transform:none;letter-spacing:0"><input type="radio" name="invRole" value="manager" checked /> Manager</label>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;text-transform:none;letter-spacing:0"><input type="radio" name="invRole" value="member" /> Member</label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('inviteModal')">Cancel</button>
+      <button class="btn-primary" onclick="sendInvite()">Send Invitation</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Modal -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal-panel" style="max-width:400px">
+    <div class="modal-header">
+      <h3 id="confirmTitle">Confirm Action</h3>
+      <button class="modal-close" onclick="closeModal('confirmModal')">✕</button>
+    </div>
+    <p id="confirmMessage" style="margin-bottom:0"></p>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('confirmModal')">Cancel</button>
+      <button class="btn-danger" id="confirmBtn">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toast-container"></div>
+
+<!-- DEV ONLY — remove in production -->
+<div class="dev-role-switcher">
+  <span class="dev-role-label">Role:</span>
+  <button class="dev-role-btn" id="devAdmin" onclick="switchRole('admin')">Admin</button>
+  <button class="dev-role-btn" id="devManager" onclick="switchRole('manager')">Manager</button>
+  <button class="dev-role-btn" id="devMember" onclick="switchRole('member')">Member</button>
+</div>
+<!-- END DEV ONLY -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// ===================== MOCK DATA =====================
+const MOCK_KPI = {
+  admin:   [{label:'Total Projects',value:'12',icon:'bi-folder',sub:'2 archived'},{label:'Active Members',value:'24',icon:'bi-people',sub:'3 invited'},{label:'Open Issues',value:'147',icon:'bi-circle-half',sub:'across all projects'},{label:'Overdue Issues',value:'8',icon:'bi-exclamation-triangle',sub:'require attention',danger:true}],
+  manager: [{label:'My Projects',value:'4',icon:'bi-folder',sub:'all active'},{label:'Team Members',value:'8',icon:'bi-people',sub:'in my projects'},{label:'Open Issues',value:'34',icon:'bi-circle-half',sub:'in my projects'},{label:'Overdue',value:'5',icon:'bi-exclamation-triangle',sub:'need attention',danger:true}],
+  member:  [{label:'My Open Issues',value:'7',icon:'bi-person-circle',sub:'assigned to me'},{label:'Due This Week',value:'3',icon:'bi-calendar-event',sub:'upcoming deadlines'},{label:'In Review',value:'2',icon:'bi-eye',sub:'awaiting review'},{label:'Overdue',value:'1',icon:'bi-exclamation-triangle',sub:'needs attention',danger:true}]
+};
+const MOCK_ACTIVITY = [
+  {name:'Sarah Chen',action:'changed status of',entity:'ENG-42 Fix auth bug',link:'issue-detail.html',action2:'to',detail:'In Review',time:'2m ago'},
+  {name:'Alex Admin',action:'created project',entity:'Mobile App v2',link:'project-board.html',action2:'',detail:'',time:'15m ago'},
+  {name:'Maria Lopez',action:'commented on',entity:'ENG-38 User onboarding flow',link:'issue-detail.html',action2:'',detail:'',time:'1h ago'},
+  {name:'Tom Singh',action:'closed sprint',entity:'Sprint 4',link:'project-sprint-detail.html',action2:'',detail:'',time:'2h ago'},
+  {name:'Sarah Chen',action:'assigned',entity:'ENG-45 API rate limiting',link:'issue-detail.html',action2:'to',detail:'Tom Singh',time:'3h ago'},
+  {name:'Alex Admin',action:'invited',entity:'jane@example.com',link:'members-workspace.html',action2:'as',detail:'Manager',time:'5h ago'},
+  {name:'Maria Lopez',action:'moved',entity:'ENG-31 Dashboard redesign',link:'issue-detail.html',action2:'to',detail:'Done',time:'6h ago'},
+  {name:'Tom Singh',action:'created issue',entity:'ENG-46 Performance audit',link:'issue-detail.html',action2:'',detail:'',time:'8h ago'},
+  {name:'Sarah Chen',action:'started sprint',entity:'Sprint 5',link:'project-sprint-detail.html',action2:'',detail:'',time:'1d ago'},
+  {name:'Alex Admin',action:'archived project',entity:'Legacy API',link:'project-list.html',action2:'',detail:'',time:'2d ago'},
+];
+const MOCK_INVITES = [
+  {email:'jane@example.com',role:'Manager'},{email:'bob@startup.io',role:'Member'}
+];
+const MOCK_SPRINTS = [
+  {project:'ENG',name:'Sprint 5',done:8,total:14,link:'project-sprint-detail.html'},
+  {project:'MKT',name:'Q2 Sprint 2',done:3,total:7,link:'project-sprint-detail.html'},
+  {project:'DEV',name:'Alpha Sprint',done:12,total:12,link:'project-sprint-detail.html'},
+];
+const MOCK_QUEUE = [
+  {name:'EmailQueue',active:3,status:'✅ Healthy'},
+  {name:'ReportQueue',active:1,status:'⏳ Waiting'},
+  {name:'ReminderQueue',active:0,status:'✅ Idle'},
+];
+const MOCK_NOTIFS = [
+  {text:'Sarah Chen commented on ENG-42',time:'2m ago',read:false},
+  {text:'You were assigned to ENG-45 API rate limiting',time:'1h ago',read:false},
+  {text:'Sprint 5 was started by Sarah Chen',time:'3h ago',read:false},
+  {text:'tom@company.com accepted your invitation',time:'1d ago',read:true},
+  {text:'ENG-38 status changed to Done',time:'2d ago',read:true},
+];
+
+// ===================== INIT =====================
+let ROLE = sessionStorage.getItem('role') || 'admin';
+const USER_DATA = JSON.parse(sessionStorage.getItem('user') || '{"name":"Alex Admin","initials":"AA","role":"admin"}');
+
+function initPage() {
+  document.body.setAttribute('data-role', ROLE);
+  updateUserUI();
+  renderKPI();
+  renderActivity();
+  renderInvites();
+  renderSprints();
+  renderQueue();
+  renderNotifs();
+  updateDevBtns();
+}
+
+function updateUserUI() {
+  const initials = USER_DATA.initials || ROLE.substring(0,2).toUpperCase();
+  document.getElementById('avatarBtn').textContent = initials;
+  document.getElementById('sidebarAvatar').textContent = initials;
+  document.getElementById('sidebarName').textContent = USER_DATA.name || 'User';
+  document.getElementById('sidebarRole').textContent = ROLE.charAt(0).toUpperCase()+ROLE.slice(1);
+  const ws = JSON.parse(sessionStorage.getItem('workspace')||'{"name":"Acme Corp"}');
+  document.getElementById('wsName').textContent = ws.name;
+  const titles = {admin:'Dashboard',manager:'My Dashboard',member:'My Dashboard'};
+  const subs = {admin:'Welcome back. Here\'s your workspace overview.',manager:'Here\'s what\'s happening in your projects.',member:'Here\'s your personal overview.'};
+  document.getElementById('dashTitle').textContent = titles[ROLE];
+  document.getElementById('dashSubtitle').textContent = subs[ROLE];
+}
+
+function renderKPI() {
+  const kpis = MOCK_KPI[ROLE];
+  document.getElementById('kpiRow').innerHTML = kpis.map(k => `
+    <div class="col-sm-6 col-xl-3">
+      <div class="kpi-card${k.danger?' kpi-danger':''}">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <div class="kpi-label">${k.label}</div>
+          <div style="width:36px;height:36px;border-radius:var(--radius-sm);background:${k.danger?'rgba(248,81,73,.1)':'var(--accent-subtle)'};display:flex;align-items:center;justify-content:center">
+            <i class="bi ${k.icon}" style="color:${k.danger?'var(--danger)':'var(--accent)'};font-size:16px"></i>
+          </div>
+        </div>
+        <div class="kpi-value">${k.value}</div>
+        <div class="kpi-sub">${k.sub}</div>
+      </div>
+    </div>`).join('');
+}
+
+function renderActivity() {
+  const feed = document.getElementById('activityFeed');
+  const items = MOCK_ACTIVITY.filter((a,i) => {
+    if(ROLE==='admin') return true;
+    if(ROLE==='manager') return i<6;
+    return i<3;
+  });
+  feed.innerHTML = items.map(a => {
+    const initials = a.name.split(' ').map(n=>n[0]).join('').toUpperCase();
+    return `<div class="activity-row">
+      <div class="avatar avatar-sm" style="flex-shrink:0">${initials}</div>
+      <div class="activity-text">
+        <span class="activity-name">${a.name}</span> ${a.action} <a href="${a.link}">${a.entity}</a>${a.action2?' '+a.action2+' <strong>'+a.detail+'</strong>':''}
+      </div>
+      <div class="activity-time">${a.time}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderInvites() {
+  document.getElementById('pendingList').innerHTML = MOCK_INVITES.map(inv => `
+    <div class="invite-row">
+      <div class="invite-email">${inv.email}</div>
+      <span class="status-badge status-inprogress">${inv.role}</span>
+      <button class="btn-ghost" style="padding:3px 8px;font-size:12px" onclick="showToast('Invitation cancelled','warning')">Cancel</button>
+    </div>`).join('');
+}
+
+function renderSprints() {
+  document.getElementById('sprintList').innerHTML = MOCK_SPRINTS.map(s => {
+    const pct = Math.round((s.done/s.total)*100);
+    return `<div class="sprint-row">
+      <div class="sprint-info">
+        <div class="sprint-name"><span class="mono" style="color:var(--text-muted)">${s.project}</span> · ${s.name}</div>
+        <div style="margin-top:6px"><div class="progress-pms"><div class="progress-fill${pct===100?' success':''}" style="width:${pct}%"></div></div></div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:3px">${s.done}/${s.total} issues · ${pct}%</div>
+      </div>
+      <a href="${s.link}" class="btn-ghost" style="font-size:12px;padding:4px 8px;white-space:nowrap">View →</a>
+    </div>`;
+  }).join('');
+}
+
+function renderQueue() {
+  document.getElementById('queueStatus').innerHTML = MOCK_QUEUE.map(q => `
+    <div class="queue-row">
+      <div class="queue-name">${q.name}</div>
+      <div class="queue-status" style="color:${q.active>0?'var(--warning)':'var(--success)'}">${q.status} ${q.active>0?'· '+q.active+' active':''}</div>
+    </div>`).join('');
+}
+
+function renderNotifs() {
+  const unread = MOCK_NOTIFS.filter(n=>!n.read).length;
+  document.getElementById('notifBadge').textContent = unread;
+  document.getElementById('notifBadge').style.display = unread>0 ? 'flex' : 'none';
+  document.getElementById('notifList').innerHTML = MOCK_NOTIFS.slice(0,5).map(n => `
+    <div class="dropdown-item-pms" style="${!n.read?'background:rgba(47,129,247,.05);border-left:2px solid var(--accent)':''}">
+      <i class="bi bi-bell${n.read?'':'-fill'}" style="color:${n.read?'var(--text-muted)':'var(--accent)'}"></i>
+      <div style="flex:1"><div style="font-size:13px">${n.text}</div><div style="font-size:11px;color:var(--text-muted)">${n.time}</div></div>
+    </div>`).join('');
+}
+
+// ===================== INTERACTIONS =====================
+function toggleNotifDropdown() {
+  document.getElementById('notifDropdown').classList.toggle('open');
+  document.getElementById('avatarMenu').classList.remove('open');
+}
+function toggleAvatarMenu() {
+  document.getElementById('avatarMenu').classList.toggle('open');
+  document.getElementById('notifDropdown').classList.remove('open');
+}
+document.addEventListener('click', e => {
+  if(!e.target.closest('#notifBtn')&&!e.target.closest('#notifDropdown')) document.getElementById('notifDropdown').classList.remove('open');
+  if(!e.target.closest('#avatarBtn')&&!e.target.closest('#avatarMenu')) document.getElementById('avatarMenu').classList.remove('open');
+});
+
+function openInviteModal() { document.getElementById('inviteModal').classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function sendInvite() {
+  const email = document.getElementById('inviteEmail').value.trim();
+  if(!email) return;
+  closeModal('inviteModal');
+  showToast(`Invitation sent to ${email}!`, 'success');
+  document.getElementById('inviteEmail').value = '';
+}
+
+// ===================== ROLE SWITCHER =====================
+function switchRole(role) {
+  ROLE = role;
+  sessionStorage.setItem('role', role);
+  const names = {admin:'Alex Admin',manager:'Morgan Manager',member:'Max Member'};
+  const initials = {admin:'AA',manager:'MM',member:'MX'};
+  sessionStorage.setItem('user', JSON.stringify({name:names[role],initials:initials[role],role}));
+  Object.assign(USER_DATA,{name:names[role],initials:initials[role],role});
+  initPage();
+}
+function updateDevBtns() {
+  ['admin','manager','member'].forEach(r => {
+    document.getElementById('dev'+r.charAt(0).toUpperCase()+r.slice(1)).classList.toggle('active', r===ROLE);
+  });
+}
+
+// ===================== TOAST =====================
+window.showToast = function(message, type='info') {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = `toast-pms toast-${type}`;
+  t.innerHTML = `<div class="toast-bar"></div><div class="toast-body">${message}</div><button class="toast-close" onclick="this.parentElement.remove()">✕</button>`;
+  c.appendChild(t);
+  setTimeout(() => { t.classList.add('fade-out'); setTimeout(()=>t.remove(),200); }, 3000);
+};
+
+// ===================== CONFIRM =====================
+window.showConfirm = function({title,message,confirmLabel='Confirm',confirmType='danger',onConfirm}) {
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmMessage').textContent = message;
+  const btn = document.getElementById('confirmBtn');
+  btn.textContent = confirmLabel;
+  btn.className = `btn-${confirmType}`;
+  btn.onclick = () => { closeModal('confirmModal'); if(onConfirm) onConfirm(); };
+  document.getElementById('confirmModal').classList.add('open');
+};
+
+initPage();
+</script>
+</body>
+</html>

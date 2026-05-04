@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Webhooks — PMS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="_shared.css"/>
+  <style>
+    .settings-nav{display:flex;flex-direction:column;gap:2px}
+    .settings-nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--radius-sm);font-size:14px;color:var(--text-secondary);text-decoration:none;transition:all .12s;border:1px solid transparent}
+    .settings-nav-item:hover{background:var(--bg-elevated);color:var(--text-primary)}
+    .settings-nav-item.active{background:var(--accent-subtle);color:var(--accent);border-color:rgba(47,129,247,.2);font-weight:500}
+    .settings-nav-item i{font-size:15px;flex-shrink:0}
+
+    .wh-row{display:flex;align-items:flex-start;gap:16px;padding:18px 20px;border-bottom:1px solid var(--bg-border);transition:background .12s}
+    .wh-row:last-child{border-bottom:none}
+    .wh-row:hover{background:var(--bg-elevated)}
+    .wh-icon{width:40px;height:40px;border-radius:var(--radius-sm);background:var(--bg-elevated);border:1px solid var(--bg-border);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;color:var(--text-secondary)}
+    .wh-body{flex:1;min-width:0}
+    .wh-name{font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:3px}
+    .wh-url{font-family:var(--font-mono);font-size:12px;color:var(--text-muted);margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .wh-events{display:flex;gap:6px;flex-wrap:wrap}
+    .event-tag{font-size:11px;font-family:var(--font-mono);padding:2px 7px;border-radius:3px;background:var(--bg-elevated);border:1px solid var(--bg-border);color:var(--text-secondary)}
+    .wh-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+    .wh-actions .btn-ghost{padding:6px 8px;font-size:14px}
+
+    .event-check{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bg-border);cursor:pointer}
+    .event-check:last-child{border-bottom:none}
+    .event-check input{cursor:pointer;accent-color:var(--accent);width:15px;height:15px;flex-shrink:0}
+    .event-check-label{font-family:var(--font-mono);font-size:13px;color:var(--text-primary)}
+    .event-check-desc{font-size:12px;color:var(--text-muted);margin-left:auto}
+  </style>
+</head>
+<body>
+<!--
+  REACT CONVERSION NOTES:
+  Component: <AdminWebhooks /> → /src/pages/admin/AdminWebhooks.jsx
+  Role guard: Admin only
+-->
+<nav class="topbar">
+  <a href="dashboard.html" class="topbar-logo">P<span>M</span>S</a>
+  <button class="workspace-switcher"><span>Acme Corp</span><i class="bi bi-chevron-down" style="font-size:11px"></i></button>
+  <div class="topbar-search"><input type="text" class="search-input" placeholder="Search..." readonly onclick="window.location.href='search.html'"/></div>
+  <div class="topbar-actions">
+    <button class="icon-btn" onclick="window.location.href='notifications.html'"><i class="bi bi-bell"></i></button>
+    <button class="avatar" id="avatarBtn" onclick="toggleAvatarMenu()">AA</button>
+  </div>
+  <div class="dropdown-pms" id="avatarMenu" style="right:8px;top:52px">
+    <a href="profile.html" class="dropdown-item-pms"><i class="bi bi-person"></i>Profile</a>
+    <a href="api-tokens.html" class="dropdown-item-pms"><i class="bi bi-key"></i>API Tokens</a>
+    <div class="dropdown-sep"></div>
+    <a href="auth-login.html" class="dropdown-item-pms danger"><i class="bi bi-box-arrow-right"></i>Sign Out</a>
+  </div>
+</nav>
+<aside class="sidebar">
+  <div class="sidebar-section-label">Main</div>
+  <a href="dashboard.html" class="nav-item"><i class="bi bi-grid-1x2"></i>Dashboard</a>
+  <a href="project-list.html" class="nav-item"><i class="bi bi-folder"></i>Projects</a>
+  <a href="members-workspace.html" class="nav-item admin-only"><i class="bi bi-people"></i>Members</a>
+  <a href="reports.html" class="nav-item manager-up"><i class="bi bi-bar-chart"></i>Reports</a>
+  <a href="search.html" class="nav-item"><i class="bi bi-search"></i>Search</a>
+  <div class="sidebar-section-label admin-only">Settings</div>
+  <a href="admin-settings.html" class="nav-item admin-only"><i class="bi bi-gear"></i>Workspace</a>
+  <a href="admin-labels.html" class="nav-item admin-only"><i class="bi bi-tags"></i>Labels</a>
+  <a href="admin-webhooks.html" class="nav-item active admin-only"><i class="bi bi-link-45deg"></i>Webhooks</a>
+  <a href="api-tokens.html" class="nav-item"><i class="bi bi-key"></i>API Tokens</a>
+  <div class="sidebar-section-label admin-only">System</div>
+  <a href="admin-bull-board.html" class="nav-item admin-only"><i class="bi bi-display"></i>Bull Board</a>
+  <a href="admin-audit-log.html" class="nav-item admin-only"><i class="bi bi-journal-text"></i>Audit Log</a>
+  <div class="sidebar-bottom">
+    <div class="sidebar-user">
+      <div class="avatar avatar-sm" id="sidebarAvatar">AA</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name" id="sidebarName">Alex Admin</div>
+        <div class="sidebar-user-role"><span class="role-badge-sm" id="sidebarRole">Admin</span></div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<main class="main-wrapper">
+  <!-- RBAC -->
+  <div id="rbacBlock" style="display:none;text-align:center;padding-top:10vh">
+    <i class="bi bi-shield-lock" style="font-size:64px;color:var(--danger)"></i>
+    <h2 class="mt-3">Admin Access Required</h2>
+    <p>Only workspace administrators can manage webhooks.</p>
+    <a href="dashboard.html" class="btn-primary" style="display:inline-block;margin-top:16px;text-decoration:none">Back to Dashboard</a>
+  </div>
+
+  <div id="pageContent">
+    <!-- Page Header -->
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <div>
+        <h1 class="mb-1">Workspace Settings</h1>
+        <p class="mb-0" style="font-size:13px">Manage your workspace configuration and preferences.</p>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <!-- Settings Side Nav -->
+      <div class="col-md-3 col-lg-2">
+        <div class="settings-nav">
+          <a href="admin-settings.html" class="settings-nav-item"><i class="bi bi-sliders"></i>General</a>
+          <a href="admin-labels.html"   class="settings-nav-item"><i class="bi bi-tags"></i>Labels</a>
+          <a href="admin-webhooks.html" class="settings-nav-item active"><i class="bi bi-link-45deg"></i>Webhooks</a>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="col-md-9 col-lg-10">
+        <!-- Section Header -->
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <div>
+            <h2 class="mb-1">Webhooks</h2>
+            <p class="mb-0" style="font-size:13px">Send real-time HTTP POST payloads to external URLs when events occur in your workspace.</p>
+          </div>
+          <button class="btn-primary" onclick="openWebhookModal(null)"><i class="bi bi-plus"></i> Add Webhook</button>
+        </div>
+
+        <!-- Docs callout -->
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--accent-subtle);border:1px solid rgba(47,129,247,.25);border-radius:var(--radius-sm);margin-bottom:20px;font-size:13px;color:var(--text-secondary)">
+          <i class="bi bi-info-circle" style="color:var(--accent);font-size:16px;flex-shrink:0"></i>
+          Webhook payloads are signed with your secret using <strong style="color:var(--text-primary);font-family:var(--font-mono);font-size:12px">HMAC-SHA256</strong>.
+          <a href="#" style="margin-left:auto;color:var(--accent);text-decoration:none;font-size:12px;white-space:nowrap">View Docs <i class="bi bi-arrow-up-right"></i></a>
+        </div>
+
+        <!-- Webhook List -->
+        <div class="card-pms" style="padding:0;overflow:hidden">
+          <div id="webhookList"></div>
+        </div>
+        <div id="webhookEmpty" class="empty-state" style="display:none">
+          <i class="bi bi-link-45deg"></i>
+          <h4>No webhooks configured</h4>
+          <p>Add a webhook to connect PMS events to external services like Slack or Discord.</p>
+          <button class="btn-primary" style="margin-top:16px" onclick="openWebhookModal(null)">Add first webhook</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Webhook Modal -->
+<div class="modal-overlay" id="webhookModal">
+  <div class="modal-panel" style="width:520px">
+    <div class="modal-header">
+      <h3 id="wmTitle">Add Webhook</h3>
+      <button class="modal-close" onclick="closeModal('webhookModal')">✕</button>
+    </div>
+    <div class="mb-3">
+      <label>Name</label>
+      <input type="text" id="wmName" class="fcc" placeholder="e.g. Discord Alerts"/>
+    </div>
+    <div class="mb-3">
+      <label>Payload URL</label>
+      <input type="url" id="wmUrl" class="fcc" placeholder="https://hooks.example.com/…"/>
+    </div>
+    <div class="mb-3">
+      <label>Secret <span style="color:var(--text-muted);text-transform:none;letter-spacing:0">(optional)</span></label>
+      <input type="text" id="wmSecret" class="fcc" placeholder="Used to sign payloads with HMAC-SHA256" style="font-family:var(--font-mono);font-size:13px"/>
+    </div>
+    <div class="mb-4">
+      <label>Events to send</label>
+      <div style="background:var(--bg-elevated);border:1px solid var(--bg-border);border-radius:var(--radius-sm);padding:4px 12px;margin-top:4px">
+        <label class="event-check">
+          <input type="checkbox" id="evAll" onchange="toggleAll(this)"/>
+          <span class="event-check-label">*</span>
+          <span class="event-check-desc">Send everything</span>
+        </label>
+        <label class="event-check"><input type="checkbox" class="ev" value="issue.created"/><span class="event-check-label">issue.created</span><span class="event-check-desc">Issue created</span></label>
+        <label class="event-check"><input type="checkbox" class="ev" value="issue.updated"/><span class="event-check-label">issue.updated</span><span class="event-check-desc">Issue status, assignee, or fields changed</span></label>
+        <label class="event-check"><input type="checkbox" class="ev" value="issue.deleted"/><span class="event-check-label">issue.deleted</span><span class="event-check-desc">Issue permanently removed</span></label>
+        <label class="event-check"><input type="checkbox" class="ev" value="comment.created"/><span class="event-check-label">comment.created</span><span class="event-check-desc">New comment posted</span></label>
+        <label class="event-check"><input type="checkbox" class="ev" value="sprint.started"/><span class="event-check-label">sprint.started</span><span class="event-check-desc">Sprint activated</span></label>
+        <label class="event-check"><input type="checkbox" class="ev" value="sprint.completed"/><span class="event-check-label">sprint.completed</span><span class="event-check-desc">Sprint closed</span></label>
+        <label class="event-check"><input type="checkbox" class="ev" value="member.invited"/><span class="event-check-label">member.invited</span><span class="event-check-desc">New member invitation sent</span></label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('webhookModal')">Cancel</button>
+      <button class="btn-primary" onclick="saveWebhook()">Save Webhook</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Modal -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal-panel" style="max-width:420px">
+    <div class="modal-header"><h3 id="confirmTitle">Confirm</h3><button class="modal-close" onclick="closeModal('confirmModal')">✕</button></div>
+    <p id="confirmMessage" style="margin-bottom:0"></p>
+    <div class="modal-footer"><button class="btn-secondary" onclick="closeModal('confirmModal')">Cancel</button><button class="btn-danger" id="confirmBtn">Delete</button></div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<div class="dev-role-switcher">
+  <span class="dev-role-label">Role:</span>
+  <button class="dev-role-btn" id="devAdmin"   onclick="switchRole('admin')">Admin</button>
+  <button class="dev-role-btn" id="devManager" onclick="switchRole('manager')">Manager</button>
+  <button class="dev-role-btn" id="devMember"  onclick="switchRole('member')">Member</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+let ROLE = sessionStorage.getItem('role')||'admin';
+let editId = null;
+
+// Integration icons
+const WH_ICONS = {
+  discord:'🎮', slack:'💬', github:'🐙', custom:'🔗'
+};
+
+let WEBHOOKS = [
+  {id:1, name:'Discord Alerts',     url:'https://discord.com/api/webhooks/123456/abcdef',      events:['issue.created','issue.updated'], status:'active',  icon:'discord', lastDelivery:'2 min ago',   deliveries:142},
+  {id:2, name:'Custom Dashboard',   url:'https://api.acme.com/v1/pms-sync',                    events:['*'],                             status:'failing', icon:'custom',  lastDelivery:'1 hour ago',  deliveries:38},
+];
+
+function initPage(){
+  document.body.setAttribute('data-role',ROLE);
+  const isAuth=ROLE==='admin';
+  document.getElementById('rbacBlock').style.display=isAuth?'none':'block';
+  document.getElementById('pageContent').style.display=isAuth?'block':'none';
+  if(!isAuth){updateDevBtns();return;}
+  const I={admin:'AA',manager:'MM',member:'MX'};
+  const N={admin:'Alex Admin',manager:'Morgan Manager',member:'Max Member'};
+  document.getElementById('avatarBtn').textContent=I[ROLE];
+  document.getElementById('sidebarAvatar').textContent=I[ROLE];
+  document.getElementById('sidebarName').textContent=N[ROLE];
+  document.getElementById('sidebarRole').textContent=ROLE.charAt(0).toUpperCase()+ROLE.slice(1);
+  renderWebhooks(); updateDevBtns();
+}
+
+function renderWebhooks(){
+  const el=document.getElementById('webhookList');
+  const em=document.getElementById('webhookEmpty');
+  if(!WEBHOOKS.length){el.innerHTML='';em.style.display='block';return;}
+  em.style.display='none';
+  el.innerHTML = WEBHOOKS.map(w=>`
+    <div class="wh-row">
+      <div class="wh-icon">${WH_ICONS[w.icon]||'🔗'}</div>
+      <div class="wh-body">
+        <div class="wh-name">${w.name}</div>
+        <div class="wh-url">${w.url}</div>
+        <div class="wh-events">
+          ${w.events.map(e=>`<span class="event-tag">${e}</span>`).join('')}
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:var(--text-muted)">
+          Last delivery: ${w.lastDelivery} · ${w.deliveries} total deliveries
+        </div>
+      </div>
+      <div class="wh-actions">
+        <span class="status-badge ${w.status==='active'?'status-done':'status-blocked'}" style="font-size:11px">${w.status==='active'?'Active':'Failing'}</span>
+        <button class="btn-ghost" title="Test" onclick="testWebhook(${w.id})"><i class="bi bi-send"></i></button>
+        <button class="btn-ghost" title="Edit" onclick="openWebhookModal(${w.id})"><i class="bi bi-pencil"></i></button>
+        <button class="btn-ghost" title="Delete" style="color:var(--danger)" onclick="delWebhook(${w.id})"><i class="bi bi-trash"></i></button>
+      </div>
+    </div>`).join('');
+}
+
+function toggleAll(el){
+  document.querySelectorAll('.ev').forEach(c=>c.checked=el.checked);
+}
+
+function openWebhookModal(id){
+  editId=id;
+  document.querySelectorAll('.ev').forEach(c=>c.checked=false);
+  document.getElementById('evAll').checked=false;
+  if(id){
+    const w=WEBHOOKS.find(x=>x.id===id);
+    document.getElementById('wmTitle').textContent='Edit Webhook';
+    document.getElementById('wmName').value=w.name;
+    document.getElementById('wmUrl').value=w.url;
+    document.getElementById('wmSecret').value='';
+    if(w.events.includes('*')){document.getElementById('evAll').checked=true;document.querySelectorAll('.ev').forEach(c=>c.checked=true);}
+    else{document.querySelectorAll('.ev').forEach(c=>{c.checked=w.events.includes(c.value);});}
+  } else {
+    document.getElementById('wmTitle').textContent='Add Webhook';
+    document.getElementById('wmName').value='';
+    document.getElementById('wmUrl').value='';
+    document.getElementById('wmSecret').value='';
+  }
+  document.getElementById('webhookModal').classList.add('open');
+}
+
+function saveWebhook(){
+  const name=document.getElementById('wmName').value.trim();
+  const url=document.getElementById('wmUrl').value.trim();
+  if(!name||!url){showToast('Name and URL are required','error');return;}
+  const allChecked=document.getElementById('evAll').checked;
+  const events=allChecked?['*']:[...document.querySelectorAll('.ev:checked')].map(c=>c.value);
+  if(!events.length){showToast('Select at least one event','error');return;}
+  if(editId){
+    const w=WEBHOOKS.find(x=>x.id===editId);
+    w.name=name;w.url=url;w.events=events;
+    showToast('Webhook updated','success');
+  } else {
+    WEBHOOKS.push({id:Date.now(),name,url,events,status:'active',icon:'custom',lastDelivery:'Never',deliveries:0});
+    showToast('Webhook added','success');
+  }
+  closeModal('webhookModal'); renderWebhooks(); editId=null;
+}
+
+function testWebhook(id){
+  const w=WEBHOOKS.find(x=>x.id===id);
+  showToast(`Test payload sent to "${w.name}"`, 'info');
+}
+
+function delWebhook(id){
+  const w=WEBHOOKS.find(x=>x.id===id);
+  showConfirm({title:'Delete Webhook',message:`Delete "${w.name}"? Any integrations using this endpoint will stop receiving events.`,confirmLabel:'Delete Webhook',onConfirm:()=>{WEBHOOKS=WEBHOOKS.filter(x=>x.id!==id);renderWebhooks();showToast('Webhook deleted','error');}});
+}
+
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function toggleAvatarMenu(){document.getElementById('avatarMenu').classList.toggle('open');}
+document.addEventListener('click',e=>{if(!e.target.closest('#avatarBtn')&&!e.target.closest('#avatarMenu'))document.getElementById('avatarMenu').classList.remove('open');});
+function switchRole(r){ROLE=r;sessionStorage.setItem('role',r);initPage();}
+function updateDevBtns(){['admin','manager','member'].forEach(r=>document.getElementById('dev'+r.charAt(0).toUpperCase()+r.slice(1)).classList.toggle('active',r===ROLE));}
+window.showToast=function(msg,type='info'){const c=document.getElementById('toast-container');const t=document.createElement('div');t.className=`toast-pms toast-${type}`;t.innerHTML=`<div class="toast-bar"></div><div class="toast-body">${msg}</div><button class="toast-close" onclick="this.parentElement.remove()">✕</button>`;c.appendChild(t);setTimeout(()=>{t.classList.add('fade-out');setTimeout(()=>t.remove(),200);},3000);};
+window.showConfirm=function({title,message,confirmLabel='Confirm',confirmType='danger',onConfirm}){document.getElementById('confirmTitle').textContent=title;document.getElementById('confirmMessage').textContent=message;const btn=document.getElementById('confirmBtn');btn.textContent=confirmLabel;btn.className=`btn-${confirmType}`;btn.onclick=()=>{closeModal('confirmModal');if(onConfirm)onConfirm();};document.getElementById('confirmModal').classList.add('open');};
+initPage();
+</script>
+</body>
+</html>
