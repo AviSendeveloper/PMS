@@ -1,7 +1,16 @@
-const KPICard = ({ kpiData }) => {
+import type { KPI } from "../../workspace.type";
+
+const icons: Record<string, string> = {
+  total_project: "bi-folder",
+  active_member: "bi-people",
+  open_issues: "bi-circle-half",
+  overdue_issues: "bi-exclamation-triangle",
+};
+
+const KPICard = ({ kpiData }: { kpiData: KPI }) => {
   return (
     <div className="col-sm-6 col-xl-3">
-      <div className="kpi-card${kpiData.danger?' kpi-danger':''}">
+      <div className={`kpi-card${kpiData.danger ? " kpi-danger" : ""}`}>
         <div
           style={{
             display: "flex",
@@ -24,7 +33,7 @@ const KPICard = ({ kpiData }) => {
             }}
           >
             <i
-              className={`bi ${kpiData.icon}`}
+              className={`bi ${icons[kpiData.type]}`}
               style={{
                 color: kpiData.danger ? "var(--danger)" : "var(--accent)",
                 fontSize: 16,

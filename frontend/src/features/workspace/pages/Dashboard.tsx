@@ -1,17 +1,34 @@
 import InviteModal from "../components/InviteModal";
 import "../style/Dashboard.css";
 import { useState } from "react";
+import type {
+  Activities,
+  Invities,
+  KPIs,
+  QueueStatuses,
+  Sprints,
+} from "../workspace.type";
+
+// TODO: Replace with actual API calls
+import { kips, activities, sprint, invities, queues } from "../dummy.data";
 
 const Dashboard = () => {
+  // modal state
   const [isInviteModelOpen, setIsInviteModelOpen] = useState(false);
   const toggleInviteModel = () => setIsInviteModelOpen(!isInviteModelOpen);
 
+  // api data state
+  const [kpis, setKpis] = useState<KPIs>(kips);
+  const [recentActivities, setRecentActivities] =
+    useState<Activities>(activities);
+  const [pendingInvitations, setPendingInvitations] =
+    useState<Invities>(invities);
+  const [activeSprints, setActiveSprints] = useState<Sprints>(sprint);
+  const [jobQueueStatus, setJobQueueStatus] = useState<QueueStatuses>(queues);
+
   return (
     <>
-      <InviteModal
-        isOpen={isInviteModelOpen}
-        onClose={toggleInviteModel}
-      />
+      <InviteModal isOpen={isInviteModelOpen} onClose={toggleInviteModel} />
       <main className="main-wrapper">
         {/* Page Header */}
         <div className="d-flex align-items-center justify-content-between mb-4">
