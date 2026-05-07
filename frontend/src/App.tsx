@@ -60,7 +60,7 @@ function App() {
           <Route path="/workspace">
             <Route index path="dashboard" element={<Dashboard />} />
             <Route path="members" element={<MemberPage />} />
-            <Route path="lebels" element={<LabelPage />} />
+            <Route path="labels" element={<LabelPage />} />
             <Route path="settings" element={<SettingPage />} />
             <Route path="webhooks" element={<WebhookPage />} />
           </Route>
@@ -75,10 +75,10 @@ function App() {
           </Route>
 
           {/* notification */}
-          <Route path="/notification" element={<NotificationPage />} />
+          <Route path="/notifications" element={<NotificationPage />} />
 
           {/* project */}
-          <Route path="/project">
+          <Route path="/projects">
             <Route index element={<ProjectPage />} />
             <Route path="settings" element={<ProjectSettingPage />} />
             <Route path="labels" element={<ProjectLabelPage />} />

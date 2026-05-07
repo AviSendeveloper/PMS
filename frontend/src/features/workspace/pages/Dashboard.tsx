@@ -16,14 +16,20 @@ import DashboardRecentActivity from "../components/dashboard/DashboardRecentActi
 import DashboardPendingInvitation from "../components/dashboard/DashboardPendingInvitation";
 import DashboardSprint from "../components/dashboard/DashboardSprint";
 import DashboardQueue from "../components/dashboard/DashboardQueue";
-import { fetchKPIs, fetchRecentActivities, fetchPendingInvitations, fetchActiveSprints, fetchJobQueueStatus } from "../workspace.api";
+import {
+  fetchKPIs,
+  fetchRecentActivities,
+  fetchPendingInvitations,
+  fetchActiveSprints,
+  fetchJobQueueStatus
+} from "../workspace.api";
+import useModal from "../hooks/useModal";
 
 const Dashboard = () => {
   const currentWorkspaceId = 123;
 
   // modal state
-  const [isInviteModelOpen, setIsInviteModelOpen] = useState(false);
-  const toggleInviteModel = () => setIsInviteModelOpen(!isInviteModelOpen);
+  const { isModelOpen: isInviteModelOpen, toggleModel: toggleInviteModel } = useModal();
 
   // api data state
   const [kpis, setKpis] = useState<KPIs>([]);
