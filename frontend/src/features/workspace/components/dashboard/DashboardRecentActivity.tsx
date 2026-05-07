@@ -1,3 +1,4 @@
+import { formatRecentDate } from '../../../../utils/date';
 import type { Activities, Activity } from '../../workspace.type'
 
 const DashboardRecentActivity = ({ data }: { data: Activities }) => {
@@ -9,9 +10,12 @@ const DashboardRecentActivity = ({ data }: { data: Activities }) => {
         <div className="activity-row">
           <div className="avatar avatar-sm" style={{ flexShrink: 0 }}>{initials}</div>
           <div className="activity-text">
-            <span className="activity-name">{activity.name}</span> {activity.action} <a href={activity.link}>{activity.entity}</a>{activity.action2 ? ' ' + activity.action2 + ' <strong>' + activity.detail + '</strong>' : ''}
+            <span className="activity-name">{activity.name}</span> {activity.action} <a href={activity.link}>{activity.entity}</a>
+            {activity.action2 && <>
+              {activity.action2} <strong>{activity.detail}</strong>
+            </>}
           </div>
-          <div className="activity-time">{activity.time}</div>
+          <div className="activity-time">{formatRecentDate(activity.time)}</div>
         </div>
 
       )

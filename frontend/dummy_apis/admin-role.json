@@ -13,11 +13,11 @@
       "type": "http",
       "documentation": "",
       "method": "get",
-      "endpoint": "api/workspace/:id/kpi",
+      "endpoint": "api/workspace/:id/kpis",
       "responses": [
         {
           "uuid": "71ef7f0d-eeeb-43eb-8206-c3407b54299c",
-          "body": "{\n  data: [\n  { label: 'Total Projects', value: '12', sub: '2 archived' },\n  { label: 'Active Members', value: '24', sub: '3 invited' },\n  { label: 'Open Issues', value: '147', sub: 'across all projects' },\n  {\n    label: 'Overdue Issues',\n    value: '8',\n    sub: 'require attention',\n    danger: true\n  }\n]\n}",
+          "body": "{\n  \"data\": [\n    {\n      \"label\": \"Total Projects\",\n      \"value\": \"12\",\n      \"sub\": \"2 archived\"\n    },\n    {\n      \"label\": \"Active Members\",\n      \"value\": \"24\",\n      \"sub\": \"3 invited\"\n    },\n    {\n      \"label\": \"Open Issues\",\n      \"value\": \"147\",\n      \"sub\": \"across all projects\"\n    },\n    {\n      \"label\": \"Overdue Issues\",\n      \"value\": \"8\",\n      \"sub\": \"require attention\",\n      \"danger\": true\n    }\n  ]\n}",
           "latency": 0,
           "statusCode": 200,
           "label": "kpi details like total users in workspace, total project, pending task (user scope) etc, will be display in dashboard",
@@ -49,7 +49,7 @@
       "type": "http",
       "documentation": "",
       "method": "get",
-      "endpoint": "api/workspace/:id/recent-activity",
+      "endpoint": "api/workspace/:id/recent-activities",
       "responses": [
         {
           "uuid": "a91b6101-2559-466a-b91b-7adf1b7d8e1e",
@@ -57,14 +57,19 @@
           "latency": 0,
           "statusCode": 200,
           "label": "",
-          "headers": [],
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
           "bodyType": "DATABUCKET",
           "filePath": "",
           "databucketID": "les0",
           "sendFileAsBody": false,
           "rules": [],
           "rulesOperator": "OR",
-          "disableTemplating": false,
+          "disableTemplating": true,
           "fallbackTo404": false,
           "default": true,
           "crudKey": "id",
@@ -80,7 +85,7 @@
       "type": "http",
       "documentation": "",
       "method": "get",
-      "endpoint": "api/workspace/:id/member/pending-invitation",
+      "endpoint": "api/workspace/:id/members/pending-invitations",
       "responses": [
         {
           "uuid": "0f4effbd-17a2-4ba9-8ca7-1b917611cbec",
@@ -88,7 +93,12 @@
           "latency": 0,
           "statusCode": 200,
           "label": "",
-          "headers": [],
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
           "bodyType": "DATABUCKET",
           "filePath": "",
           "databucketID": "ya6l",
@@ -240,28 +250,28 @@
       "id": "les0",
       "name": "recent-activity",
       "documentation": "",
-      "value": "[\n  {{#repeat 10}}\n    {\n      \"name\": \"{{ faker 'person.fullName' }}\",\n      \"action\": \"{{ faker 'company.catchPhrase' }}\",\n      \"entity\": \"{{ faker 'company.catchPhraseAdjective' }}\",\n      \"link\": \"{{ faker 'internet.url' }}\",\n      \"action2\": \"{{ faker 'company.catchPhrase' }}\",\n      \"detail\": \"{{ faker 'company.buzzPhrase' }}\",\n      \"time\": \"{{ faker 'date.recent' }}\"\n    }\n  {{/repeat }}\n]"
+      "value": "{\n  \"data\": [\n    {{#repeat 10}}\n      {\n        \"name\": \"{{ faker 'person.fullName' }}\",\n        \"action\": \"{{ faker 'company.catchPhrase' }}\",\n        \"entity\": \"{{ faker 'company.catchPhraseAdjective' }}\",\n        \"link\": \"{{ faker 'internet.url' }}\",\n        \"action2\": \"{{ faker 'company.catchPhrase' }}\",\n        \"detail\": \"{{ faker 'company.buzzPhrase' }}\",\n        \"time\": \"{{ faker 'date.recent' }}\"\n      }\n    {{/repeat }}\n  ]\n}"
     },
     {
       "uuid": "0f9559c8-423b-4eee-86f8-64a50c401247",
       "id": "ya6l",
       "name": "pending-member",
       "documentation": "",
-      "value": "[\n  {{#repeat 4}}\n    {\n      \"email\": \"{{ faker 'internet.email' }}\",\n      \"role\": \"{{oneOf (array 'manager' 'member')}}\"\n    }\n  {{/repeat}}\n]"
+      "value": "{\n  \"data\": [\n    {{#repeat 4}}\n    {\n      \"email\": \"{{ faker 'internet.email' }}\",\n      \"role\": \"{{oneOf (array 'manager' 'member')}}\"\n    }\n  {{/repeat}}\n  ]\n}"
     },
     {
       "uuid": "a1781631-28d8-476f-944a-33d6df4d96d9",
       "id": "dktw",
       "name": "sprint",
       "documentation": "",
-      "value": "[\n  {{#repeat 4}}\n    {\n      \"project\":'ENG',\n      \"name\":\"{{ faker 'company.catchPhraseAdjective' }}\",\n      \"done\":\"{{ faker 'number.int' min=10 max=15}}\",\n      \"total\":\"{{ faker 'number.int' min=20 max=25}}\",\n      \"link\": \"{{faker 'number.int' min=20 max=25}}\"\n    }\n  {{/repeat}}\n]"
+      "value": "{\n  \"data\": [\n    {{#repeat 4}}\n      {\n        \"project\":\"ENG\",\n        \"name\":\"{{ faker 'company.catchPhraseAdjective' }}\",\n        \"done\":\"{{ faker 'number.int' min=10 max=15}}\",\n        \"total\":\"{{ faker 'number.int' min=20 max=25}}\",\n        \"link\": \"{{faker 'number.int' min=20 max=25}}\"\n      }\n    {{/repeat}}\n  ]\n}"
     },
     {
       "uuid": "94a739d4-c31b-480a-8a78-0f7e15d5901c",
       "id": "qibp",
       "name": "queue",
       "documentation": "",
-      "value": "[\n  {{#repeat 4}}\n  {\n    \"name\":\"{{ faker 'company.buzzNoun' }}Queue\",\n    \"active\":\"{{ faker 'number.int' min=10 max=15}}\",\n    \"status\": \"{{oneOf (array '✅ Healthy' '⏳ Waiting'  '✅ Idle')}}\"\n  }\n  {{/repeat}}\n]"
+      "value": "{\n  \"data\": [\n    {{#repeat 4}}\n      {\n        \"name\":\"{{ faker 'company.buzzNoun' }}Queue\",\n        \"active\":\"{{ faker 'number.int' min=10 max=15}}\",\n        \"status\": \"{{oneOf (array '✅ Healthy' '⏳ Waiting'  '✅ Idle')}}\"\n      }\n    {{/repeat}}\n  ]\n}"
     }
   ],
   "callbacks": []

@@ -1,6 +1,6 @@
 import InviteModal from "../components/InviteModal";
 import "../style/Dashboard.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type {
   Activities,
   Invities,
@@ -16,20 +16,47 @@ import DashboardRecentActivity from "../components/dashboard/DashboardRecentActi
 import DashboardPendingInvitation from "../components/dashboard/DashboardPendingInvitation";
 import DashboardSprint from "../components/dashboard/DashboardSprint";
 import DashboardQueue from "../components/dashboard/DashboardQueue";
+import { fetchKPIs, fetchRecentActivities, fetchPendingInvitations, fetchActiveSprints, fetchJobQueueStatus } from "../workspace.api";
 
 const Dashboard = () => {
+  const currentWorkspaceId = 123;
+
   // modal state
   const [isInviteModelOpen, setIsInviteModelOpen] = useState(false);
   const toggleInviteModel = () => setIsInviteModelOpen(!isInviteModelOpen);
 
   // api data state
-  const [kpis, setKpis] = useState<KPIs>(kips);
+  const [kpis, setKpis] = useState<KPIs>([]);
   const [recentActivities, setRecentActivities] =
-    useState<Activities>(activities);
+    useState<Activities>([]);
   const [pendingInvitations, setPendingInvitations] =
-    useState<Invities>(invities);
-  const [activeSprints, setActiveSprints] = useState<Sprints>(sprint);
-  const [jobQueueStatus, setJobQueueStatus] = useState<QueueStatuses>(queues);
+    useState<Invities>([]);
+  const [activeSprints, setActiveSprints] = useState<Sprints>([]);
+  const [jobQueueStatus, setJobQueueStatus] = useState<QueueStatuses>([]);
+
+  const fetchDashboardData = async () => {
+    try {
+      const [kpis, recentActivities, pendingInvitations, activeSprints, jobQueueStatus] = await Promise.all([
+        fetchKPIs(currentWorkspaceId),
+        fetchRecentActivities(currentWorkspaceId),
+        fetchPendingInvitations(currentWorkspaceId),
+        fetchActiveSprints(currentWorkspaceId),
+        fetchJobQueueStatus(currentWorkspaceId),
+      ])
+
+      setKpis(kpis);
+      setRecentActivities(recentActivities);
+      setPendingInvitations(pendingInvitations);
+      setActiveSprints(activeSprints);
+      setJobQueueStatus(jobQueueStatus);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  useEffect(() => {
+    fetchDashboardData()
+  }, []);
 
   return (
     <>
