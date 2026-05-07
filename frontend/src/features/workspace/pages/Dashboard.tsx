@@ -11,6 +11,11 @@ import type {
 
 // TODO: Replace with actual API calls
 import { kips, activities, sprint, invities, queues } from "../dummy.data";
+import DashboardKpi from "../components/dashboard/DashboardKpi";
+import DashboardRecentActivity from "../components/dashboard/DashboardRecentActivity";
+import DashboardPendingInvitation from "../components/dashboard/DashboardPendingInvitation";
+import DashboardSprint from "../components/dashboard/DashboardSprint";
+import DashboardQueue from "../components/dashboard/DashboardQueue";
 
 const Dashboard = () => {
   // modal state
@@ -48,52 +53,22 @@ const Dashboard = () => {
           </button>
         </div>
         {/* KPI Row */}
-        <div className="row g-3 mb-4" id="kpiRow" />
+        <DashboardKpi data={kpis} />
+
         {/* Main 2-col */}
         <div className="row g-3">
           {/* Activity Feed */}
-          <div className="col-lg-8">
-            <div className="card-pms">
-              <div className="card-section-head">
-                <span>Recent Activity</span>
-                <a href="#">View all</a>
-              </div>
-              <div id="activityFeed" />
-            </div>
-          </div>
+          <DashboardRecentActivity data={recentActivities} />
           {/* Right col */}
           <div className="col-lg-4">
             {/* Pending Invitations (admin-only) */}
-            <div className="card-pms mb-3 admin-only" id="pendingCard">
-              <div className="card-section-head">
-                <span>Pending Invitations</span>
-                <a href="members-workspace.html">Manage</a>
-              </div>
-              <div id="pendingList" />
-              <button
-                className="btn-ghost"
-                style={{ padding: "6px 0", fontSize: 13, marginTop: 8 }}
-                //   onclick="openInviteModal()"
-              >
-                <i className="bi bi-plus" /> Invite Member
-              </button>
-            </div>
+            <DashboardPendingInvitation data={pendingInvitations} />
+
             {/* Active Sprints */}
-            <div className="card-pms mb-3">
-              <div className="card-section-head">
-                <span>Active Sprints</span>
-                <a href="project-sprints.html">View all</a>
-              </div>
-              <div id="sprintList" />
-            </div>
+            <DashboardSprint data={activeSprints} />
+
             {/* Job Queue Status (admin-only) */}
-            <div className="card-pms admin-only" id="queueCard">
-              <div className="card-section-head">
-                <span>Job Queue Status</span>
-                <a href="admin-bull-board.html">View All</a>
-              </div>
-              <div id="queueStatus" />
-            </div>
+            <DashboardQueue data={jobQueueStatus} />
           </div>
         </div>
       </main>

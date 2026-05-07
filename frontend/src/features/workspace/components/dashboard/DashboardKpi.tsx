@@ -1,4 +1,4 @@
-import type { KPI } from "../../workspace.type";
+import type { KPI, KPIs } from "../../workspace.type";
 
 const icons: Record<string, string> = {
   total_project: "bi-folder",
@@ -48,4 +48,16 @@ const KPICard = ({ kpiData }: { kpiData: KPI }) => {
   );
 };
 
-export default KPICard;
+const DashboardKpi = ({ data }: { data: KPIs }) => {
+  const renderKpis = () => {
+    return data.map(kpi => {
+      return <KPICard kpiData={kpi} />
+    })
+  }
+
+  return <div className="row g-3 mb-4" id="kpiRow">
+    {renderKpis()}
+  </div>
+}
+
+export default DashboardKpi;

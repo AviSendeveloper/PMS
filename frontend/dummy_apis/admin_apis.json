@@ -1,0 +1,94 @@
+{
+  "uuid": "b7a10c8b-5795-404f-b437-97955372f33b",
+  "lastMigration": 33,
+  "name": "Admin apis",
+  "endpointPrefix": "",
+  "latency": 0,
+  "port": 3001,
+  "hostname": "",
+  "folders": [],
+  "routes": [
+    {
+      "uuid": "c3615ff6-02f7-487c-83a1-926d4680ddd5",
+      "type": "http",
+      "documentation": "kip details like total number of project, total users etc in dashboard",
+      "method": "get",
+      "endpoint": "api/kips",
+      "responses": [
+        {
+          "uuid": "33fbdd0b-0a9c-43cc-a870-af52b2e9e4d6",
+          "body": "{\n  data: [\n    {\"label\":\"Total Projects\",\"value\":\"12\",\"icon\":\"bi-folder\",\"sub\":\"2 archived\"},{\"label\":\"Active Members\",\"value\":\"24\",\"icon\":\"bi-people\",\"sub\":\"3 invited\"},{\"label\":\"Open Issues\",\"value\":\"147\",\"icon\":\"bi-circle-half\",\"sub\":\"across all projects\"},{\"label\":\"Overdue Issues\",\"value\":\"8\",\"icon\":\"bi-exclamation-triangle\",\"sub\":\"require attention\",\"danger\":true}\n  ]\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    }
+  ],
+  "rootChildren": [
+    {
+      "type": "route",
+      "uuid": "c3615ff6-02f7-487c-83a1-926d4680ddd5"
+    }
+  ],
+  "proxyMode": false,
+  "proxyHost": "",
+  "proxyRemovePrefix": false,
+  "tlsOptions": {
+    "enabled": false,
+    "type": "CERT",
+    "pfxPath": "",
+    "certPath": "",
+    "keyPath": "",
+    "caPath": "",
+    "passphrase": ""
+  },
+  "cors": true,
+  "headers": [
+    {
+      "key": "Content-Type",
+      "value": "application/json"
+    },
+    {
+      "key": "Access-Control-Allow-Origin",
+      "value": "*"
+    },
+    {
+      "key": "Access-Control-Allow-Methods",
+      "value": "GET,POST,PUT,PATCH,DELETE,HEAD,OPTIONS"
+    },
+    {
+      "key": "Access-Control-Allow-Headers",
+      "value": "Content-Type, Origin, Accept, Authorization, Content-Length, X-Requested-With"
+    }
+  ],
+  "proxyReqHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "proxyResHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "data": [],
+  "callbacks": []
+}
