@@ -54,13 +54,18 @@ const Dashboard = () => {
     }
   }
 
+  const handleInviteModalClose = async () => {
+    await fetchDashboardData();
+    toggleInviteModel();
+  }
+
   useEffect(() => {
     fetchDashboardData()
   }, []);
 
   return (
     <>
-      <InviteModal isOpen={isInviteModelOpen} onClose={toggleInviteModel} />
+      <InviteModal isOpen={isInviteModelOpen} onClose={handleInviteModalClose} />
       <main className="main-wrapper">
         {/* Page Header */}
         <div className="d-flex align-items-center justify-content-between mb-4">
@@ -89,7 +94,7 @@ const Dashboard = () => {
           {/* Right col */}
           <div className="col-lg-4">
             {/* Pending Invitations (admin-only) */}
-            <DashboardPendingInvitation data={pendingInvitations} />
+            <DashboardPendingInvitation data={pendingInvitations} onInviteClick={toggleInviteModel} />
 
             {/* Active Sprints */}
             <DashboardSprint data={activeSprints} />

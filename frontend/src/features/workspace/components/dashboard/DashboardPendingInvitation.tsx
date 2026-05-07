@@ -1,6 +1,11 @@
 import type { Invities, Invitie } from "../../workspace.type";
 
-const DashboardPendingInvitation = ({ data }: { data: Invities }) => {
+interface DashboardPendingInvitationProps {
+    data: Invities;
+    onInviteClick: () => void;
+}
+
+const DashboardPendingInvitation = ({ data, onInviteClick }: DashboardPendingInvitationProps) => {
     const renderPendingInvitations = () => {
         return data.map((inv: Invitie) => {
             return (
@@ -25,7 +30,7 @@ const DashboardPendingInvitation = ({ data }: { data: Invities }) => {
                 {renderPendingInvitations()}
             </div>
             <button className="btn-ghost" style={{ padding: '6px 0', fontSize: 13, marginTop: 8 }}
-            // onClick="openInviteModal()"
+                onClick={onInviteClick}
             >
                 <i className="bi bi-plus" /> Invite Member
             </button>
