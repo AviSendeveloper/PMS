@@ -161,3 +161,50 @@ export const queues: QueueStatuses = [
   { name: "ReportQueue", active: 1, status: "⏳ Waiting" },
   { name: "ReminderQueue", active: 0, status: "✅ Idle" },
 ];
+
+// member page
+export const activeMembers = [
+  {
+    id: 1,
+    name: "Alex Admin",
+    email: "alex@example.com",
+    role: "admin",
+    joined: "Jan 10, 2026",
+  },
+  {
+    id: 2,
+    name: "Morgan Manager",
+    email: "morgan@example.com",
+    role: "manager",
+    joined: "Jan 15, 2026",
+  },
+  {
+    id: 3,
+    name: "Max Member",
+    email: "max@example.com",
+    role: "member",
+    joined: "Feb 2, 2026",
+  },
+];
+
+export const pendingMembers = [
+  {
+    id: 1,
+    name: "Jane Doe",
+    email: "[EMAIL_ADDRESS]",
+    role: "manager",
+    joined: "Jan 10, 2026",
+    invitedBy: "Alex Admin",
+    sent: "2 days ago",
+  },
+];
+
+export const suspendedMembers = [
+  {
+    id: 1,
+    name: "Dan Kelly",
+    email: "dan@example.com",
+    role: "member",
+    joined: "Jan 10, 2026",
+  },
+];

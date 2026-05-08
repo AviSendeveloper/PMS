@@ -19,7 +19,7 @@ const KPICard = ({ kpiData }: { kpiData: KPI }) => {
             marginBottom: 12,
           }}
         >
-          <div className="kpi-label">${kpiData.label}</div>
+          <div className="kpi-label">{kpiData.label}</div>
           <div
             style={{
               width: 36,
@@ -41,8 +41,8 @@ const KPICard = ({ kpiData }: { kpiData: KPI }) => {
             />
           </div>
         </div>
-        <div className="kpi-value">${kpiData.value}</div>
-        <div className="kpi-sub">${kpiData.sub}</div>
+        <div className="kpi-value">{kpiData.value}</div>
+        <div className="kpi-sub">{kpiData.sub}</div>
       </div>
     </div>
   );
@@ -50,14 +50,16 @@ const KPICard = ({ kpiData }: { kpiData: KPI }) => {
 
 const DashboardKpi = ({ data }: { data: KPIs }) => {
   const renderKpis = () => {
-    return data.map(kpi => {
-      return <KPICard kpiData={kpi} />
-    })
-  }
+    return data.map((kpi) => {
+      return <KPICard kpiData={kpi} />;
+    });
+  };
 
-  return <div className="row g-3 mb-4" id="kpiRow">
-    {renderKpis()}
-  </div>
-}
+  return (
+    <div className="row g-3 mb-4" id="kpiRow">
+      {renderKpis()}
+    </div>
+  );
+};
 
 export default DashboardKpi;

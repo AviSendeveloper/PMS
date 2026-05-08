@@ -44,3 +44,20 @@ export interface QueueStatus {
   status: string;
 }
 export type QueueStatuses = QueueStatus[];
+
+// members
+export type AllowedMemberType = "active" | "pending" | "suspended";
+
+export interface Member {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+  joined: string;
+}
+export interface PendingMember extends Member {
+  invitedBy: string;
+  sent: string;
+}
+export type PendingMembers = PendingMember[];
+export type Members = Member[];
