@@ -1,36 +1,6 @@
 const ProjectMember = () => {
   return (
-    <main className="main-wrapper">
-      <div className="breadcrumb-pms">
-        <a href="project-list.html">Projects</a>
-        <span className="sep">/</span>
-        <a href="project-board.html">Engineering Platform</a>
-        <span className="sep">/</span>
-        <span className="current">Members</span>
-      </div>
-      <div className="project-tabs mb-4">
-        <a href="project-board.html" className="project-tab">
-          Board
-        </a>
-        <a href="project-backlog.html" className="project-tab">
-          Backlog
-        </a>
-        <a href="project-sprints.html" className="project-tab">
-          Sprints
-        </a>
-        <a href="reports.html" className="project-tab manager-up">
-          Reports
-        </a>
-        <a
-          href="project-members.html"
-          className="project-tab active manager-up"
-        >
-          Members
-        </a>
-        <a href="project-settings.html" className="project-tab manager-up">
-          Settings
-        </a>
-      </div>
+    <>
       <div
         id="rbacBlock"
         style={{ display: "none", textAlign: "center", paddingTop: "10vh" }}
@@ -79,7 +49,7 @@ const ProjectMember = () => {
           </table>
         </div>
       </div>
-    </main>
+    </>
   );
 };
 

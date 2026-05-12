@@ -1,0 +1,32 @@
+.board-wrap{overflow-x:auto;padding-bottom:20px}
+    .board-cols{display:flex;gap:12px;min-width:max-content}
+    .board-col{width:280px;flex-shrink:0;background:var(--bg-surface);border:1px solid var(--bg-border);border-radius:var(--radius-md);display:flex;flex-direction:column;max-height:calc(100vh - 260px)}
+    .col-header{padding:12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--bg-border);flex-shrink:0}
+    .col-count{background:var(--bg-elevated);color:var(--text-muted);border-radius:100px;padding:1px 7px;font-size:11px;font-weight:600}
+    .col-add{margin-left:auto;background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:16px;padding:0 2px;line-height:1}
+    .col-add:hover{color:var(--text-primary)}
+    .col-body{padding:8px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:6px}
+    .col-footer{padding:8px;border-top:1px solid var(--bg-border);flex-shrink:0}
+    .add-issue-ghost{width:100%;background:none;border:none;color:var(--text-muted);font-size:13px;padding:6px 8px;text-align:left;cursor:pointer;border-radius:var(--radius-sm);font-family:var(--font-body)}
+    .add-issue-ghost:hover{background:var(--bg-elevated);color:var(--text-primary)}
+    .issue-card{background:var(--bg-elevated);border:1px solid var(--bg-border);border-radius:var(--radius-sm);padding:10px;cursor:pointer;transition:border-color .12s,transform .1s;position:relative}
+    .issue-card:hover{border-color:var(--accent)}
+    .issue-card.dragging{opacity:.5;transform:rotate(2deg)}
+    .issue-card.drag-over{border-color:var(--accent);background:var(--accent-subtle)}
+    .issue-ident{font-size:11px;color:var(--text-muted);font-family:var(--font-mono);margin-bottom:4px;display:flex;align-items:center;gap:6px}
+    .issue-title{font-size:13px;font-weight:500;color:var(--text-primary);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:6px}
+    .label-chip{font-size:10px;border-radius:100px;padding:1px 7px;background:var(--accent-subtle);color:var(--accent);margin-right:3px}
+    .card-footer-row{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
+    .due-date{font-size:11px;color:var(--text-muted)}
+    .due-date.overdue{color:var(--danger)}
+    .subtask-count{font-size:11px;color:var(--text-muted)}
+    .typing-indicator{font-size:11px;color:var(--text-muted);font-style:italic;padding:4px 0 0}
+    .quick-create{display:none;padding:8px}
+    .quick-create input{background:var(--bg-elevated);border:1px solid var(--accent);border-radius:var(--radius-sm);color:var(--text-primary);padding:7px 10px;font-size:13px;width:100%;font-family:var(--font-body);outline:none}
+    .presence-bar{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-secondary)}
+    .presence-avatar{position:relative;display:inline-block}
+    .presence-dot{width:8px;height:8px;border-radius:50%;background:var(--success);border:2px solid var(--bg-base);position:absolute;bottom:0;right:0}
+    .filter-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+    .filter-avatar{width:28px;height:28px;border-radius:50%;background:var(--bg-elevated);border:2px solid var(--bg-border);color:var(--text-secondary);font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
+    .filter-avatar.selected{border-color:var(--accent);background:var(--accent-subtle);color:var(--accent)}
+    .filter-select{background:var(--bg-elevated);border:1px solid var(--bg-border);border-radius:var(--radius-sm);color:var(--text-primary);padding:5px 28px 5px 10px;font-size:12px;font-family:var(--font-body);outline:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 16 16'%3E%3Cpath fill='%238b949e' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center}

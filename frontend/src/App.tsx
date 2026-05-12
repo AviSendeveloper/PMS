@@ -11,7 +11,13 @@ const SprintDetailsPage = lazy(
 const ProjectSettingPage = lazy(
   () => import("./features/project/pages/ProjectSettingPage"),
 );
+const ProjectNavLayout = lazy(
+  () => import("./components/layout/ProjectNavLayout"),
+);
 const ProjectPage = lazy(() => import("./features/project/pages/ProjectPage"));
+const ProjectBoardPage = lazy(
+  () => import("./features/project/pages/ProjectBoardPage"),
+);
 const ProjectBacklogPage = lazy(
   () => import("./features/project/pages/ProjectBacklogPage"),
 );
@@ -80,9 +86,13 @@ function App() {
           {/* project */}
           <Route path="/projects">
             <Route index element={<ProjectPage />} />
-            <Route path="settings" element={<ProjectSettingPage />} />
-            <Route path="labels" element={<ProjectLabelPage />} />
-            <Route path="members" element={<ProjectMemberPage />} />
+            <Route element={<ProjectNavLayout />}>
+              <Route path=":projectId/board" element={<ProjectBoardPage />} />
+              <Route path=":projectId/backlog" element={<ProjectBacklogPage />} />
+              <Route path=":projectId/settings" element={<ProjectSettingPage />} />
+              <Route path=":projectId/labels" element={<ProjectLabelPage />} />
+              <Route path=":projectId/members" element={<ProjectMemberPage />} />
+            </Route>
 
             {/* sprint */}
             <Route path="sprint">
@@ -94,9 +104,6 @@ function App() {
             <Route path="issue">
               <Route path="details" element={<IssueDetailsPage />} />
             </Route>
-
-            {/* backlog */}
-            <Route path="backlog" element={<ProjectBacklogPage />} />
           </Route>
         </Route>
       </Routes>

@@ -138,7 +138,7 @@ const ProjectCard = ({ project }: { project: Project }) => {
         <div className="proj-footer">
           <span>Updated {project.updated}</span>
           <Link
-            to={`/project/${project.id}`}
+            to={`/projects/${project.id}/board`}
             className="btn-ghost"
             style={{ padding: "3px 8px", fontSize: 12 }}
           >

@@ -14,3 +14,24 @@ export type Project = {
   archived: boolean;
 };
 export type Projects = Project[];
+
+// project board
+export type BoardColumn = {
+  id: string;
+  label: string;
+  status: string;
+}
+
+export type BoardIssue = {
+    id: number,
+    ident: string,
+    title: string,
+    priority: string,
+    status: string,
+    labels: string[],
+    assignee: string,
+    due: string,
+    overdue: boolean,
+    subtasks?: string,
+    typing?: boolean
+  }

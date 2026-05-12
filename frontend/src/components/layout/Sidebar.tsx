@@ -1,83 +1,83 @@
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 
 const Sidebar = () => {
   return (
     <aside className="sidebar" id="sidebar">
       <div className="sidebar-section-label">Main</div>
-      <Link to="/workspace/dashboard" className="nav-item active" id="nav-dashboard">
+      <NavLink to="/workspace/dashboard" className="nav-item" id="nav-dashboard">
         <i className="bi bi-grid-1x2" />
         Dashboard
-      </Link>
-      <Link to="/projects" className="nav-item" id="nav-projects">
+      </NavLink>
+      <NavLink to="/projects" className="nav-item" id="nav-projects">
         <i className="bi bi-folder" />
         Projects
-      </Link>
-      <Link
+      </NavLink>
+      <NavLink
         to="/workspace/members"
         className="nav-item admin-only"
         id="nav-members"
       >
         <i className="bi bi-people" />
         Members
-      </Link>
-      {/* <Link to="/workspace/reports" className="nav-item manager-up" id="nav-reports">
+      </NavLink>
+      {/* <NavLink to="/workspace/reports" className="nav-item manager-up" id="nav-reports">
         <i className="bi bi-bar-chart" />
         Reports
-      </Link> */}
-      {/* <Link to="/workspace/search" className="nav-item" id="nav-search">
+      </NavLink> */}
+      {/* <NavLink to="/workspace/search" className="nav-item" id="nav-search">
         <i className="bi bi-search" />
         Search
-      </Link> */}
-      <Link to="/notifications" className="nav-item" id="nav-notifs">
+      </NavLink> */}
+      <NavLink to="/notifications" className="nav-item" id="nav-notifs">
         <i className="bi bi-bell" />
         Notifications
-      </Link>
+      </NavLink>
       <div className="sidebar-section-label admin-only">Settings</div>
-      <Link
+      <NavLink
         to="/workspace/settings"
         className="nav-item admin-only"
         id="nav-workspace"
       >
         <i className="bi bi-gear" />
         Workspace
-      </Link>
-      <Link
+      </NavLink>
+      <NavLink
         to="/workspace/labels"
         className="nav-item admin-only"
         id="nav-labels"
       >
         <i className="bi bi-tags" />
         Labels
-      </Link>
-      <Link
+      </NavLink>
+      <NavLink
         to="/workspace/webhooks"
         className="nav-item admin-only"
         id="nav-webhooks"
       >
         <i className="bi bi-link-45deg" />
         Webhooks
-      </Link>
-      {/* <Link to="/workspace/api-tokens" className="nav-item" id="nav-api-tokens">
+      </NavLink>
+      {/* <NavLink to="/workspace/api-tokens" className="nav-item" id="nav-api-tokens">
         <i className="bi bi-key" />
         API Tokens
-      </Link> */}
+      </NavLink> */}
       {/* <div className="sidebar-section-label admin-only">System</div>
-      <Link
+      <NavLink
         to="/workspace/admin-bull-board"
         className="nav-item admin-only"
         id="nav-bull"
       >
         <i className="bi bi-display" />
         Bull Board
-      </Link>
-      <Link
+      </NavLink>
+      <NavLink
         to="/audit-logs"
         className="nav-item admin-only"
         id="nav-audit"
       >
         <i className="bi bi-journal-text" />
         Audit Log
-      </Link> */}
+      </NavLink> */}
       <div className="sidebar-bottom">
         <div className="sidebar-user">
           <div className="avatar avatar-sm" id="sidebarAvatar">
