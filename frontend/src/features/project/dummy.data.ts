@@ -193,3 +193,34 @@ export const boardIssues = [
     overdue: false,
   },
 ];
+
+// members
+export const projectMembers = [
+  {
+    id: 1,
+    name: "Alex Admin",
+    email: "alex@example.com",
+    prole: "Manager",
+    initials: "AA",
+    assigned: 0,
+    added: "Jan 10, 2026",
+  },
+  {
+    id: 2,
+    name: "Sarah Chen",
+    email: "sarah@example.com",
+    prole: "Member",
+    initials: "SC",
+    assigned: 5,
+    added: "Jan 15, 2026",
+  },
+  {
+    id: 3,
+    name: "Tom Singh",
+    email: "tom@example.com",
+    prole: "Member",
+    initials: "TS",
+    assigned: 3,
+    added: "Feb 2, 2026",
+  },
+];
