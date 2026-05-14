@@ -4,9 +4,10 @@ import type { Project } from "../project.type";
 import { projectList } from "../dummy.data";
 import ProjectCard from "../components/ProjectCard";
 import CreateProjectModal from "../components/CreateProjectModal";
+import useModal from "../../../hooks/useModal";
 
 const ProjectPage = () => {
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
+  const { isModelOpen: isCreateModalOpen, toggleModel: toggleCreateProjectModal } = useModal();
   const [projects, setProjects] = useState<Project[]>(projectList);
 
   const renderProjects = () => {
@@ -14,7 +15,7 @@ const ProjectPage = () => {
   };
 
   const handleCreateProjectModal = () => {
-    setIsCreateModalOpen((prev) => !prev);
+    toggleCreateProjectModal();
   };
 
   return (

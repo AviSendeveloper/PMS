@@ -1,8 +1,16 @@
 import { useState } from "react";
 import { projectMembers as projMembers } from "../dummy.data";
 import type { ProjectMember } from "../project.type";
+import useModal from "../../../hooks/useModal";
+import AddMemberModal from "../components/AddMemberModal";
 
 const ProjectMember = () => {
+  // modal state
+  const {
+    isModelOpen: isAddMemberModalOpen,
+    toggleModel: toggleAddMemberModal,
+  } = useModal();
+
   const [projectMembers, setProjectMembers] =
     useState<ProjectMember[]>(projMembers);
 
@@ -71,6 +79,10 @@ const ProjectMember = () => {
 
   return (
     <>
+      <AddMemberModal
+        isOpen={isAddMemberModalOpen}
+        onClose={toggleAddMemberModal}
+      />
       <div
         id="rbacBlock"
         style={{ display: "none", textAlign: "center", paddingTop: "10vh" }}
@@ -98,7 +110,7 @@ const ProjectMember = () => {
           <h2 className="mb-0">Project Members (3)</h2>
           <button
             className="btn-primary manager-up"
-            // onclick="openModal('addMemberModal')"
+            onClick={toggleAddMemberModal}
           >
             <i className="bi bi-plus" /> Add Member
           </button>
@@ -115,9 +127,7 @@ const ProjectMember = () => {
                 <th style={{ width: 100 }}>Actions</th>
               </tr>
             </thead>
-            <tbody id="memberBody">
-              {renderMembers()}
-            </tbody>
+            <tbody id="memberBody">{renderMembers()}</tbody>
           </table>
         </div>
       </div>

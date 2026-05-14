@@ -1,4 +1,4 @@
-import InviteModal from "../components/InviteModal";
+import InviteModal from "../components/members/InviteModal";
 import "../style/Dashboard.css";
 import { useEffect, useState } from "react";
 import type {
@@ -23,7 +23,7 @@ import {
   fetchActiveSprints,
   fetchJobQueueStatus
 } from "../workspace.api";
-import useModal from "../hooks/useModal";
+import useModal from "../../../hooks/useModal";
 
 const Dashboard = () => {
   const currentWorkspaceId = 123;

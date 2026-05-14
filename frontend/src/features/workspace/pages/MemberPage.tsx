@@ -1,5 +1,5 @@
 import "../style/MemberPage.css";
-import InviteModal from "../components/InviteModal";
+import InviteModal from "../components/members/InviteModal";
 import useModal from "../hooks/useModal";
 import ActiveMembers from "../components/members/ActiveMembers";
 import PendingMembers from "../components/members/PendingMembers";
