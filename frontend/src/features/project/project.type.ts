@@ -22,7 +22,7 @@ export type BoardColumn = {
   status: string;
 };
 
-export type BoardIssue = {
+export interface BoardIssue {
   id: number;
   ident: string;
   title: string;
@@ -46,3 +46,19 @@ export type ProjectMember = {
   assigned: number;
   added: string;
 };
+
+//sprint backlog
+export type Backlog = {
+  id: string;
+  name: string;
+  status: string;
+  dates: string;
+  issues: BacklogIssue[];
+}
+
+export type BacklogIssue = Omit<BoardIssue, 'labels' | 'overdue'> & {
+  overdue?: boolean;
+  labels?: string[];
+  points: number;
+  type: string;
+}

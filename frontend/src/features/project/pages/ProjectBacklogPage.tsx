@@ -1,6 +1,32 @@
+import { useState } from "react";
 import "../style/ProjectBacklogPage.css";
+import { sprintBacklogs } from "../dummy.data";
+import type { Backlog, BacklogIssue } from "../project.type";
+import BacklogIssueGroup from "../components/BacklogIssueGroup";
+import BacklogIssueDetails from "../components/BacklogIssueDetails";
 
 const ProjectBacklogPage = () => {
+  const [backlogs, setBacklogs] = useState<Backlog[]>(sprintBacklogs);
+  const [selectedIssue, setSelecredIssue] = useState<BacklogIssue>(null);
+
+  const selectIssue = (backlogId: string, issueId: number) => {
+    const backlog = backlogs.find((backlog) => backlog.id === backlogId);
+    if (backlog) {
+      const issue = backlog.issues.find((issue) => issue.id === issueId);
+      setSelecredIssue(issue);
+    }
+  };
+
+  const renderBacklogs = () => {
+    return backlogs.map((backlog) => (
+      <BacklogIssueGroup
+        key={backlog.id}
+        backlog={backlog}
+        selectIssue={selectIssue}
+      />
+    ));
+  };
+
   return (
     <>
       <div id="bulkBar" className="bulk-bar">
@@ -35,11 +61,11 @@ const ProjectBacklogPage = () => {
       </div>
       <div className="row g-3">
         <div className="col-lg-8">
-          <div id="backlogContent" />
+          <div id="backlogContent">{renderBacklogs()}</div>
         </div>
         <div className="col-lg-4">
           <div className="preview-panel" id="previewPanel">
-            <div className="preview-empty" id="previewEmpty">
+            <div className="preview-empty" id="previewEmpty" style={{ display: !selectedIssue ? "block" : "none" }}>
               <i
                 className="bi bi-layout-sidebar-inset"
                 style={{ fontSize: 32, color: "var(--text-muted)" }}
@@ -51,7 +77,12 @@ const ProjectBacklogPage = () => {
               </p>
               <small>Click an issue row to see details here</small>
             </div>
-            <div id="previewContent" style={{ display: "none" }} />
+            <div
+              id="previewContent"
+              style={{ display: selectedIssue ? "block" : "none" }}
+            >
+              {selectedIssue && <BacklogIssueDetails issue={selectedIssue} />}
+            </div>
           </div>
         </div>
       </div>
